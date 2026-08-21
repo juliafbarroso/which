@@ -1,0 +1,1296 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<title>Automações de Produto, Wizard V2 (Which)</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+  * { box-sizing: border-box; margin:0; padding:0; }
+  body {
+    font-family: 'Inter', -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    background: #FAFAFA;
+    color: #262626;
+    line-height: 1.4;
+  }
+  .wrap { max-width: 1180px; margin: 0 auto; padding: 40px 32px 80px; }
+
+  header.top { margin-bottom: 28px; }
+  .eyebrow { font-size: 12px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; color: #008633; margin-bottom: 8px; }
+  h1 { font-size: 30px; font-weight: 800; color: #171717; margin-bottom: 6px; }
+  .subtitle { font-size: 15px; color: #6D6D6E; max-width: 720px; }
+
+  .stats { display: flex; gap: 12px; margin: 28px 0 8px; flex-wrap: wrap; }
+  .stat {
+    flex: 1; min-width: 150px;
+    background: #fff; border: 1px solid #E5E5E5; border-radius: 12px;
+    padding: 16px 18px;
+  }
+  .stat .num { font-size: 28px; font-weight: 800; color: #171717; }
+  .stat .lbl { font-size: 12.5px; color: #6D6D6E; margin-top: 2px; }
+  .stat.total { border-color: #008633; background: #F3FBF5; }
+  .stat.total .num { color: #008633; }
+
+  .filters { display:flex; gap:8px; margin: 24px 0 8px; flex-wrap: wrap; }
+  .filter-btn {
+    font-size: 13px; font-weight: 600; padding: 8px 16px; border-radius: 999px;
+    background: #fff; border: 1px solid #D4D4D4; color: #404040; cursor: pointer;
+  }
+  .filter-btn.active { background: #171717; color: #fff; border-color: #171717; }
+
+  .legend { font-size: 12.5px; color: #6D6D6E; margin: 4px 0 20px; }
+
+  section.section { margin-top: 30px; }
+  .section-head { display:flex; align-items:center; gap: 10px; margin-bottom: 14px; }
+  .section-head h2 { font-size: 18px; font-weight: 700; color: #262626; }
+  .section-count { font-size: 12px; font-weight: 700; padding: 2px 9px; border-radius: 999px; }
+
+  .cards-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 14px; }
+
+  .card {
+    background: #fff; border: 1px solid #E5E5E5; border-radius: 12px; padding: 16px 18px;
+    display: flex; flex-direction: column; gap: 8px;
+  }
+  .card-top { display:flex; align-items:flex-start; justify-content: space-between; gap: 10px; }
+  .card-top h3 { font-size: 14.5px; font-weight: 700; color: #171717; line-height: 1.3; }
+  .badge { font-size: 10.5px; font-weight: 700; padding: 3px 9px; border-radius: 999px; white-space: nowrap; flex-shrink:0; }
+  .flag-skeleton { display:inline-block; font-size: 10.5px; font-weight: 700; color: #9D231C; background: #FEF2EC; border-radius: 6px; padding: 2px 8px; width: fit-content; }
+  .oquefaz { font-size: 13px; color: #404040; }
+  .note { font-size: 12px; color: #B15600; font-style: italic; }
+  .meta-row { display: flex; flex-direction: column; gap: 6px; margin-top: 4px; padding-top: 8px; border-top: 1px dashed #E5E5E5; }
+  .meta-item { display:flex; flex-direction:column; gap: 1px; }
+  .meta-label { font-size: 10.5px; font-weight: 700; text-transform: uppercase; letter-spacing: .03em; color: #A3A3A3; }
+  .meta-value { font-size: 12.5px; color: #262626; }
+  .rascunho {
+    margin-top: 6px; background: #FFF3E6; border: 1px solid #FFD8AE; border-radius: 8px; padding: 8px 10px;
+  }
+  .rascunho-tag { font-size: 10px; font-weight: 800; text-transform: uppercase; letter-spacing: .03em; color: #B15600; }
+  .rascunho p { font-size: 12px; color: #8B4400; margin-top: 4px; }
+
+  footer { margin-top: 48px; padding-top: 20px; border-top: 1px solid #E5E5E5; font-size: 12px; color: #A3A3A3; }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header class="top">
+    <div class="eyebrow">Wizard de Acompanhamento V2 · Which</div>
+    <h1>Automações de produto que tocam o Ploomes</h1>
+    <p class="subtitle">Levantamento feito direto no painel de fluxos (EDA), comparado com os manuais de produto no Confluence. Para cada automação: o que ela faz hoje, o gatilho que a dispara, e a sugestão preliminar de manter, adaptar ou deixar de fora do Which.</p>
+  </header>
+
+  <div class="stats">
+    <div class="stat total"><div class="num">49</div><div class="lbl">automações mapeadas</div></div>
+    <div class="stat"><div class="num">3</div><div class="lbl">precisam adaptar</div></div>
+    <div class="stat"><div class="num">24</div><div class="lbl">mantêm como está</div></div>
+    <div class="stat"><div class="num">13</div><div class="lbl">a confirmar</div></div>
+    <div class="stat"><div class="num">9</div><div class="lbl">não se aplicam</div></div>
+  </div>
+
+  <div class="filters">
+    <button class="filter-btn active" data-filter="all" onclick="setFilter('all', this)">Todas (49)</button>
+    <button class="filter-btn" data-filter="adaptar" onclick="setFilter('adaptar', this)">Precisam adaptar (3)</button>
+    <button class="filter-btn" data-filter="confirmar" onclick="setFilter('confirmar', this)">A confirmar (13)</button>
+    <button class="filter-btn" data-filter="replicar" onclick="setFilter('replicar', this)">Mantêm como está (24)</button>
+    <button class="filter-btn" data-filter="naoaplica" onclick="setFilter('naoaplica', this)">Não se aplicam (9)</button>
+  </div>
+  <p class="legend">As caixas em laranja marcadas "Rascunho, validar" são ideias minhas de ajuste de gatilho, ainda não decididas, servem só de ponto de partida para a discussão.</p>
+  <p class="legend">Origem: o sistema onde a automação se origina, o nó que lê o gatilho e dispara o resto do fluxo, não é necessariamente o sistema "principal" (coluna que já se chamava "Orquestrador"). Caminho de sistemas: a ordem sequencial real em que cada sistema é tocado pelo fluxo.</p>
+
+  
+    <section class="section" data-section="adaptar">
+      <div class="section-head">
+        <h2>Precisam adaptar</h2>
+        <span class="section-count" style="color:#B15600;background:#FFF3E6">3</span>
+      </div>
+      <div class="cards-grid">
+    <div class="card" data-cat="adaptar">
+      <div class="card-top">
+        <h3>Fluxo de criação de card no ploomes e disparo ativo via blip</h3>
+        <span class="badge" style="color:#B15600;background:#FFF3E6;border:1px solid #FFD8AE">Precisa adaptar</span>
+      </div>
+      
+      <p class="oquefaz">Cria/atualiza cliente e card no Ploomes a partir de evento de formulário; dispara mensagem ativa via template no Blip quando não há conversa em aberto.</p>
+      
+      <div class="meta-row">
+        <div class="meta-item">
+          <span class="meta-label">Gatilho hoje</span>
+          <span class="meta-value">Evento de formulário (Origem Formulários) que cria/atualiza o cliente e o card.</span>
+        </div>
+        <div class="meta-item">
+          <span class="meta-label">Caminho de sistemas</span>
+          <span class="meta-value">Formulário → Ploomes → Blip</span>
+        </div>
+        <div class="meta-item">
+          <span class="meta-label">Status no wizard V2</span>
+          <span class="meta-value">Processo recebido</span>
+        </div>
+      </div>
+      
+        <div class="rascunho">
+          <span class="rascunho-tag">Rascunho, validar</span>
+          <p>Rascunho: manter o gatilho; reavaliar se o disparo ativo via Blip ainda é necessário na V2, já que o wizard é passivo (cliente entra para ver, sem push, exceto sessão pública).</p>
+        </div>
+    </div>
+    <div class="card" data-cat="adaptar">
+      <div class="card-top">
+        <h3>Fluxo Blip → V2</h3>
+        <span class="badge" style="color:#B15600;background:#FFF3E6;border:1px solid #FFD8AE">Precisa adaptar</span>
+      </div>
+      
+      <p class="oquefaz">Cria/atualiza cliente e card quando o cliente inicia conversa pelo WhatsApp.</p>
+      
+      <div class="meta-row">
+        <div class="meta-item">
+          <span class="meta-label">Gatilho hoje</span>
+          <span class="meta-value">Contato inicia conversa no chatbot da Blip com nome identificado (ou atualização de card via Blip).</span>
+        </div>
+        <div class="meta-item">
+          <span class="meta-label">Caminho de sistemas</span>
+          <span class="meta-value">Blip → Ploomes / Blip → SIJ v2 / Blip → Meta Ads (gatilhos distintos do mesmo orquestrador)</span>
+        </div>
+        <div class="meta-item">
+          <span class="meta-label">Status no wizard V2</span>
+          <span class="meta-value">Processo recebido</span>
+        </div>
+      </div>
+      
+        <div class="rascunho">
+          <span class="rascunho-tag">Rascunho, validar</span>
+          <p>Rascunho: manter o gatilho; avaliar apenas como a conversa iniciada pela Blip deve refletir no wizard.</p>
+        </div>
+    </div>
+    <div class="card" data-cat="adaptar">
+      <div class="card-top">
+        <h3>Fluxo de sincronização de fases</h3>
+        <span class="badge" style="color:#B15600;background:#FFF3E6;border:1px solid #FFD8AE">Precisa adaptar</span>
+      </div>
+      
+      <p class="oquefaz">Grava o timestamp de entrada em cada fase do card (dois gatilhos, criação e atualização de fase).</p>
+      
+      <div class="meta-row">
+        <div class="meta-item">
+          <span class="meta-label">Gatilho hoje</span>
+          <span class="meta-value">Dois gatilhos: card criado, ou card com fase alterada.</span>
+        </div>
+        <div class="meta-item">
+          <span class="meta-label">Caminho de sistemas</span>
+          <span class="meta-value">Ploomes (interno)</span>
+        </div>
+        <div class="meta-item">
+          <span class="meta-label">Status no wizard V2</span>
+          <span class="meta-value">Todos (transversal)</span>
+        </div>
+      </div>
+      
+        <div class="rascunho">
+          <span class="rascunho-tag">Rascunho, validar</span>
+          <p>Rascunho: mesmo gatilho; verificar se todas as fases do Ploomes têm um status correspondente nos 15 do wizard V2.</p>
+        </div>
+    </div>
+</div>
+    </section>
+    <section class="section" data-section="confirmar">
+      <div class="section-head">
+        <h2>A confirmar</h2>
+        <span class="section-count" style="color:#867400;background:#FFFBE0">13</span>
+      </div>
+      <div class="cards-grid">
+    <div class="card" data-cat="confirmar">
+      <div class="card-top">
+        <h3>Sinalizar Empréstimo OAB</h3>
+        <span class="badge" style="color:#867400;background:#FFFBE0;border:1px solid #EFE7A8">A confirmar</span>
+      </div>
+      
+      <p class="oquefaz">Verifica elegibilidade de empréstimo pela OAB; atualiza cliente no Ploomes e busca card por contato.</p>
+      
+      <p class="note">Fluxo novo, ainda não confirmado o objetivo com Comercial/Produto; sem isso não dá pra decidir se precisa adaptar ou manter.</p>
+      <div class="meta-row">
+        <div class="meta-item">
+          <span class="meta-label">Gatilho hoje</span>
+          <span class="meta-value">Verificação de elegibilidade de empréstimo pela OAB do cliente.</span>
+        </div>
+        <div class="meta-item">
+          <span class="meta-label">Caminho de sistemas</span>
+          <span class="meta-value">Ploomes (interno)</span>
+        </div>
+        <div class="meta-item">
+          <span class="meta-label">Status no wizard V2</span>
+          <span class="meta-value">Processo recebido</span>
+        </div>
+      </div>
+      
+    </div>
+    <div class="card" data-cat="confirmar">
+      <div class="card-top">
+        <h3>Fluxo de Novo Negócio v2</h3>
+        <span class="badge" style="color:#867400;background:#FFFBE0;border:1px solid #EFE7A8">A confirmar</span>
+      </div>
+      
+      <p class="oquefaz">Busca cliente no Ploomes; cria processo, negócio, cadernos, créditos e partes no SIJ v2; cria task e atualiza card no Ploomes.</p>
+      
+      <p class="note">Tem alerta de regra de execução ausente no serviço que atualiza o card no Ploomes; precisa confirmar com Tecnologia antes de decidir a recomendação.</p>
+      <div class="meta-row">
+        <div class="meta-item">
+          <span class="meta-label">Gatilho hoje</span>
+          <span class="meta-value">Não documentado (este fluxo não tem manual, ver aba 3). A confirmar direto no painel EDA.</span>
+        </div>
+        <div class="meta-item">
+          <span class="meta-label">Caminho de sistemas</span>
+          <span class="meta-value">Ploomes → SIJ v2 → Ploomes</span>
+        </div>
+        <div class="meta-item">
+          <span class="meta-label">Status no wizard V2</span>
+          <span class="meta-value">Processo recebido</span>
+        </div>
+      </div>
+      
+    </div>
+    <div class="card" data-cat="confirmar">
+      <div class="card-top">
+        <h3>Etiqueta Apto para Empréstimo em Todos os Cards</h3>
+        <span class="badge" style="color:#867400;background:#FFFBE0;border:1px solid #EFE7A8">A confirmar</span>
+      </div>
+      
+      <p class="oquefaz">Adiciona etiqueta/tag de elegibilidade de empréstimo nos cards do Ploomes.</p>
+      
+      <p class="note">Gatilho e objetivo já estão claros pela descrição do fluxo; falta só a decisão de comitê sobre status/recomendação, não é mais dúvida técnica.</p>
+      <div class="meta-row">
+        <div class="meta-item">
+          <span class="meta-label">Gatilho hoje</span>
+          <span class="meta-value">Não confirmado (manual não detalha o gatilho). A confirmar no painel EDA.</span>
+        </div>
+        <div class="meta-item">
+          <span class="meta-label">Caminho de sistemas</span>
+          <span class="meta-value">Ploomes (interno)</span>
+        </div>
+        <div class="meta-item">
+          <span class="meta-label">Status no wizard V2</span>
+          <span class="meta-value">A confirmar</span>
+        </div>
+      </div>
+      
+    </div>
+    <div class="card" data-cat="confirmar">
+      <div class="card-top">
+        <h3>Fluxo de notificação de processo fit - Programa de Benefícios</h3>
+        <span class="badge" style="color:#867400;background:#FFFBE0;border:1px solid #EFE7A8">A confirmar</span>
+      </div>
+      
+      <p class="oquefaz">Busca movimentações fit dos usuários do Programa de Benefícios, cria notificação e envia e-mail.</p>
+      
+      <p class="note">Não toca Ploomes hoje, mas foi incluído porque o Programa de Benefícios está migrando pro Which; falta decidir se essa notificação continua fora da plataforma ou entra na jornada.</p>
+      <div class="meta-row">
+        <div class="meta-item">
+          <span class="meta-label">Gatilho hoje</span>
+          <span class="meta-value">Movimentação "fit" identificada para usuários do Programa de Benefícios (provável rotina periódica). A confirmar.</span>
+        </div>
+        <div class="meta-item">
+          <span class="meta-label">Caminho de sistemas</span>
+          <span class="meta-value">Programa de Benefícios (interno)</span>
+        </div>
+        <div class="meta-item">
+          <span class="meta-label">Status no wizard V2</span>
+          <span class="meta-value">A confirmar</span>
+        </div>
+      </div>
+      
+    </div>
+    <div class="card" data-cat="confirmar">
+      <div class="card-top">
+        <h3>Fluxo Chave de Acesso</h3>
+        <span class="badge" style="color:#867400;background:#FFFBE0;border:1px solid #EFE7A8">A confirmar</span>
+      </div>
+      <span class="flag-skeleton">sem lógica implementada hoje</span>
+      <p class="oquefaz">Sem lógica implementada apesar do nome.</p>
+      
+      <p class="note">Sem lógica implementada hoje (100% manual); o nome sugere relação com o status 'Aguardando acesso ao processo', precisa confirmar com Tecnologia se está nos planos.</p>
+      <div class="meta-row">
+        <div class="meta-item">
+          <span class="meta-label">Gatilho hoje</span>
+          <span class="meta-value">Nenhum, sem lógica implementada hoje.</span>
+        </div>
+        <div class="meta-item">
+          <span class="meta-label">Status no wizard V2</span>
+          <span class="meta-value">Aguardando acesso ao processo</span>
+        </div>
+      </div>
+      
+    </div>
+    <div class="card" data-cat="confirmar">
+      <div class="card-top">
+        <h3>Fluxo Filtro Advogado</h3>
+        <span class="badge" style="color:#867400;background:#FFFBE0;border:1px solid #EFE7A8">A confirmar</span>
+      </div>
+      <span class="flag-skeleton">sem lógica implementada hoje</span>
+      <p class="oquefaz">Sem lógica implementada apesar do nome.</p>
+      
+      <p class="note">Sem lógica implementada hoje; o nome sugere alguma etapa de filtragem/qualificação do advogado, precisa confirmar com Tecnologia o objetivo real.</p>
+      <div class="meta-row">
+        <div class="meta-item">
+          <span class="meta-label">Gatilho hoje</span>
+          <span class="meta-value">Nenhum, sem lógica implementada hoje.</span>
+        </div>
+        <div class="meta-item">
+          <span class="meta-label">Status no wizard V2</span>
+          <span class="meta-value">A confirmar</span>
+        </div>
+      </div>
+      
+    <div class="card" data-cat="confirmar">
+      <div class="card-top">
+        <h3>Fluxo de Cálculo Incremento de Risco [EM CONSTRUÇÃO]</h3>
+        <span class="badge" style="color:#867400;background:#FFFBE0;border:1px solid #EFE7A8">A confirmar</span>
+      </div>
+      <span class="flag-skeleton">em construção</span>
+      <p class="oquefaz">Calcula incremento de risco; o próprio nome indica que está em construção.</p>
+      <p class="note">Ainda em construção no painel (diagrama incompleto, só duas regras em texto corrido); não dá pra avaliar se precisa adaptar até a lógica ser implementada.</p>
+      <div class="meta-row">
+        <div class="meta-item">
+          <span class="meta-label">Gatilho hoje</span>
+          <span class="meta-value">A confirmar (não coberto pelo rascunho do Cláudio)</span>
+        </div>
+        <div class="meta-item">
+          <span class="meta-label">Caminho de sistemas</span>
+          <span class="meta-value">A confirmar</span>
+        </div>
+        <div class="meta-item">
+          <span class="meta-label">Status no wizard V2</span>
+          <span class="meta-value">A confirmar</span>
+        </div>
+      </div>
+    </div>
+    <div class="card" data-cat="confirmar">
+      <div class="card-top">
+        <h3>Fluxo Novo Processo</h3>
+        <span class="badge" style="color:#867400;background:#FFFBE0;border:1px solid #EFE7A8">A confirmar</span>
+      </div>
+      <span class="flag-skeleton">sem lógica implementada hoje</span>
+      <p class="oquefaz">Sem lógica implementada apesar do nome.</p>
+      <p class="note">Fluxo esqueleto, sem lógica implementada no painel; a relação com Ploomes hoje é só o gatilho, não dá pra avaliar se precisa adaptar até ser construído.</p>
+      <div class="meta-row">
+        <div class="meta-item">
+          <span class="meta-label">Gatilho hoje</span>
+          <span class="meta-value">A confirmar (não coberto pelo rascunho do Cláudio)</span>
+        </div>
+        <div class="meta-item">
+          <span class="meta-label">Status no wizard V2</span>
+          <span class="meta-value">A confirmar</span>
+        </div>
+      </div>
+    </div>
+    <div class="card" data-cat="confirmar">
+      <div class="card-top">
+        <h3>Fluxo novo card no Ploomes</h3>
+        <span class="badge" style="color:#867400;background:#FFFBE0;border:1px solid #EFE7A8">A confirmar</span>
+      </div>
+      <span class="flag-skeleton">sem lógica implementada hoje</span>
+      <p class="oquefaz">Sem lógica implementada apesar do nome.</p>
+      <p class="note">Fluxo esqueleto, sem lógica implementada no painel; a relação com Ploomes hoje é só o gatilho, não dá pra avaliar se precisa adaptar até ser construído.</p>
+      <div class="meta-row">
+        <div class="meta-item">
+          <span class="meta-label">Gatilho hoje</span>
+          <span class="meta-value">A confirmar (não coberto pelo rascunho do Cláudio)</span>
+        </div>
+        <div class="meta-item">
+          <span class="meta-label">Status no wizard V2</span>
+          <span class="meta-value">A confirmar</span>
+        </div>
+      </div>
+    </div>
+    <div class="card" data-cat="confirmar">
+      <div class="card-top">
+        <h3>Fluxo atualização card no Ploomes</h3>
+        <span class="badge" style="color:#867400;background:#FFFBE0;border:1px solid #EFE7A8">A confirmar</span>
+      </div>
+      <span class="flag-skeleton">sem lógica implementada hoje</span>
+      <p class="oquefaz">Sem lógica implementada apesar do nome.</p>
+      <p class="note">Fluxo esqueleto, sem lógica implementada no painel; a relação com Ploomes hoje é só o gatilho, não dá pra avaliar se precisa adaptar até ser construído.</p>
+      <div class="meta-row">
+        <div class="meta-item">
+          <span class="meta-label">Gatilho hoje</span>
+          <span class="meta-value">A confirmar (não coberto pelo rascunho do Cláudio)</span>
+        </div>
+        <div class="meta-item">
+          <span class="meta-label">Status no wizard V2</span>
+          <span class="meta-value">A confirmar</span>
+        </div>
+      </div>
+    </div>
+    <div class="card" data-cat="confirmar">
+      <div class="card-top">
+        <h3>Fluxo Atualização Card</h3>
+        <span class="badge" style="color:#867400;background:#FFFBE0;border:1px solid #EFE7A8">A confirmar</span>
+      </div>
+      <span class="flag-skeleton">sem lógica implementada hoje</span>
+      <p class="oquefaz">Sem lógica implementada apesar do nome.</p>
+      <p class="note">Fluxo esqueleto, sem lógica implementada no painel; a relação com Ploomes hoje é só o gatilho, não dá pra avaliar se precisa adaptar até ser construído.</p>
+      <div class="meta-row">
+        <div class="meta-item">
+          <span class="meta-label">Gatilho hoje</span>
+          <span class="meta-value">A confirmar (não coberto pelo rascunho do Cláudio)</span>
+        </div>
+        <div class="meta-item">
+          <span class="meta-label">Status no wizard V2</span>
+          <span class="meta-value">A confirmar</span>
+        </div>
+      </div>
+    </div>
+    <div class="card" data-cat="confirmar">
+      <div class="card-top">
+        <h3>Fluxo Nova Prospecção</h3>
+        <span class="badge" style="color:#867400;background:#FFFBE0;border:1px solid #EFE7A8">A confirmar</span>
+      </div>
+      <span class="flag-skeleton">sem lógica implementada hoje</span>
+      <p class="oquefaz">Sem lógica implementada apesar do nome.</p>
+      <p class="note">Fluxo esqueleto, sem lógica implementada no painel; a relação com Ploomes hoje é só o gatilho, não dá pra avaliar se precisa adaptar até ser construído.</p>
+      <div class="meta-row">
+        <div class="meta-item">
+          <span class="meta-label">Gatilho hoje</span>
+          <span class="meta-value">A confirmar (não coberto pelo rascunho do Cláudio)</span>
+        </div>
+        <div class="meta-item">
+          <span class="meta-label">Status no wizard V2</span>
+          <span class="meta-value">A confirmar</span>
+        </div>
+      </div>
+    </div>
+    <div class="card" data-cat="confirmar">
+      <div class="card-top">
+        <h3>Fluxo Atualização da Prospecção</h3>
+        <span class="badge" style="color:#867400;background:#FFFBE0;border:1px solid #EFE7A8">A confirmar</span>
+      </div>
+      <span class="flag-skeleton">sem lógica implementada hoje</span>
+      <p class="oquefaz">Sem lógica implementada apesar do nome.</p>
+      <p class="note">Fluxo esqueleto, sem lógica implementada no painel; a relação com Ploomes hoje é só o gatilho, não dá pra avaliar se precisa adaptar até ser construído.</p>
+      <div class="meta-row">
+        <div class="meta-item">
+          <span class="meta-label">Gatilho hoje</span>
+          <span class="meta-value">A confirmar (não coberto pelo rascunho do Cláudio)</span>
+        </div>
+        <div class="meta-item">
+          <span class="meta-label">Status no wizard V2</span>
+          <span class="meta-value">A confirmar</span>
+        </div>
+      </div>
+    </div>
+    </div></div>
+    </section>
+    <section class="section" data-section="replicar">
+      <div class="section-head">
+        <h2>Mantêm como está</h2>
+        <span class="section-count" style="color:#008633;background:#EAFBEF">24</span>
+      </div>
+      <div class="cards-grid">
+    <div class="card" data-cat="replicar">
+      <div class="card-top">
+        <h3>Fluxo para Enfileirar Lead Score</h3>
+        <span class="badge" style="color:#008633;background:#EAFBEF;border:1px solid #B6E8C4">Mantém como está</span>
+      </div>
+      
+      <p class="oquefaz">Busca cliente no Ploomes e envia nome/CPF/OAB para análise de score no SIJ.</p>
+      
+      <div class="meta-row">
+        <div class="meta-item">
+          <span class="meta-label">Gatilho hoje</span>
+          <span class="meta-value">Card criado ou com campos relevantes atualizados no Ploomes.</span>
+        </div>
+        <div class="meta-item">
+          <span class="meta-label">Caminho de sistemas</span>
+          <span class="meta-value">Ploomes → SIJ</span>
+        </div>
+        <div class="meta-item">
+          <span class="meta-label">Status no wizard V2</span>
+          <span class="meta-value">Processo recebido / Em análise</span>
+        </div>
+      </div>
+      
+    </div>
+    <div class="card" data-cat="replicar">
+      <div class="card-top">
+        <h3>Fluxo de prospecção OAB</h3>
+        <span class="badge" style="color:#008633;background:#EAFBEF;border:1px solid #B6E8C4">Mantém como está</span>
+      </div>
+      
+      <p class="oquefaz">Busca card no Ploomes e envia o processo + OAB do advogado para prospecção.</p>
+      
+      <div class="meta-row">
+        <div class="meta-item">
+          <span class="meta-label">Gatilho hoje</span>
+          <span class="meta-value">Card no Ploomes com o processo e a OAB do advogado preenchidos.</span>
+        </div>
+        <div class="meta-item">
+          <span class="meta-label">Status no wizard V2</span>
+          <span class="meta-value">Processo recebido</span>
+        </div>
+      </div>
+      
+    </div>
+    <div class="card" data-cat="replicar">
+      <div class="card-top">
+        <h3>Fluxo de Pesquisa OAB Escavador</h3>
+        <span class="badge" style="color:#008633;background:#EAFBEF;border:1px solid #B6E8C4">Mantém como está</span>
+      </div>
+      
+      <p class="oquefaz">Consulta a OAB no Escavador (disparado por novo cliente ou atualização de OAB); grava resultado, atualiza cliente e contato no Blip, cria task no Ploomes se não localizar.</p>
+      
+      <div class="meta-row">
+        <div class="meta-item">
+          <span class="meta-label">Gatilho hoje</span>
+          <span class="meta-value">Novo cliente com OAB preenchida, ou atualização do campo OAB de um cliente existente.</span>
+        </div>
+        <div class="meta-item">
+          <span class="meta-label">Caminho de sistemas</span>
+          <span class="meta-value">Ploomes → Escavador → Ploomes → Blip</span>
+        </div>
+        <div class="meta-item">
+          <span class="meta-label">Status no wizard V2</span>
+          <span class="meta-value">Processo recebido / Em análise</span>
+        </div>
+      </div>
+      
+    </div>
+    <div class="card" data-cat="replicar">
+      <div class="card-top">
+        <h3>Fluxo Score Cliente SIJ</h3>
+        <span class="badge" style="color:#008633;background:#EAFBEF;border:1px solid #B6E8C4">Mantém como está</span>
+      </div>
+      
+      <p class="oquefaz">Recebe score de cliente calculado no SIJ e atualiza OtherProperties/tag do contato no Ploomes.</p>
+      
+      <div class="meta-row">
+        <div class="meta-item">
+          <span class="meta-label">Gatilho hoje</span>
+          <span class="meta-value">SIJ calcula o score do cliente e devolve o resultado.</span>
+        </div>
+        <div class="meta-item">
+          <span class="meta-label">Caminho de sistemas</span>
+          <span class="meta-value">SIJ → Ploomes</span>
+        </div>
+        <div class="meta-item">
+          <span class="meta-label">Status no wizard V2</span>
+          <span class="meta-value">Processo recebido / Em análise</span>
+        </div>
+      </div>
+      
+    </div>
+    <div class="card" data-cat="replicar">
+      <div class="card-top">
+        <h3>Fluxo Análise Humana SIJ</h3>
+        <span class="badge" style="color:#008633;background:#EAFBEF;border:1px solid #B6E8C4">Mantém como está</span>
+      </div>
+      
+      <p class="oquefaz">Recebe resultado da análise humana do SIJ; verifica/cria cliente e card no Ploomes.</p>
+      
+      <div class="meta-row">
+        <div class="meta-item">
+          <span class="meta-label">Gatilho hoje</span>
+          <span class="meta-value">SIJ conclui a análise humana e devolve o resultado.</span>
+        </div>
+        <div class="meta-item">
+          <span class="meta-label">Caminho de sistemas</span>
+          <span class="meta-value">SIJ → Ploomes</span>
+        </div>
+        <div class="meta-item">
+          <span class="meta-label">Status no wizard V2</span>
+          <span class="meta-value">Em análise</span>
+        </div>
+      </div>
+      
+    </div>
+    <div class="card" data-cat="replicar">
+      <div class="card-top">
+        <h3>Fluxo sincronização cadastro Ploomes (card comercial) -&gt; SIJ(prospect)</h3>
+        <span class="badge" style="color:#008633;background:#EAFBEF;border:1px solid #B6E8C4">Mantém como está</span>
+      </div>
+      
+      <p class="oquefaz">Busca cliente no Ploomes, roda timer, busca/cadastra prospect no SIJ; atualiza o card no Ploomes só quando cliente.relacionamento vem como "Suspenso" ou "Problema" (fora isso, só cria/atualiza o prospect no SIJ).</p>
+      
+      <div class="meta-row">
+        <div class="meta-item">
+          <span class="meta-label">Gatilho hoje</span>
+          <span class="meta-value">Card do funil comercial cadastrado no Ploomes.</span>
+        </div>
+        <div class="meta-item">
+          <span class="meta-label">Caminho de sistemas</span>
+          <span class="meta-value">Ploomes → SIJ → Ploomes (condicional)</span>
+        </div>
+        <div class="meta-item">
+          <span class="meta-label">Status no wizard V2</span>
+          <span class="meta-value">Processo recebido</span>
+        </div>
+      </div>
+      
+    </div>
+    <div class="card" data-cat="replicar">
+      <div class="card-top">
+        <h3>Fluxo Novo Cliente → V2</h3>
+        <span class="badge" style="color:#008633;background:#EAFBEF;border:1px solid #B6E8C4">Mantém como está</span>
+      </div>
+      
+      <p class="oquefaz">Cadastra ou atualiza o cliente no SIJ (schema v2); grava id_sij de volta no Ploomes.</p>
+      
+      <div class="meta-row">
+        <div class="meta-item">
+          <span class="meta-label">Gatilho hoje</span>
+          <span class="meta-value">Cliente criado no Ploomes (type = created).</span>
+        </div>
+        <div class="meta-item">
+          <span class="meta-label">Caminho de sistemas</span>
+          <span class="meta-value">Ploomes → SIJ v2 → Ploomes</span>
+        </div>
+        <div class="meta-item">
+          <span class="meta-label">Status no wizard V2</span>
+          <span class="meta-value">Processo recebido</span>
+        </div>
+      </div>
+      
+    </div>
+    <div class="card" data-cat="replicar">
+      <div class="card-top">
+        <h3>Fluxo Atualização Cliente</h3>
+        <span class="badge" style="color:#008633;background:#EAFBEF;border:1px solid #B6E8C4">Mantém como está</span>
+      </div>
+      
+      <p class="oquefaz">Edita cliente no SIJ (nome, telefone, cpf, email, tipo_cliente) a partir de atualização no card do Ploomes; cria task no Ploomes se não conseguir atualizar no SIJ.</p>
+      
+      <div class="meta-row">
+        <div class="meta-item">
+          <span class="meta-label">Gatilho hoje</span>
+          <span class="meta-value">Card do cliente atualizado no Ploomes.</span>
+        </div>
+        <div class="meta-item">
+          <span class="meta-label">Caminho de sistemas</span>
+          <span class="meta-value">Ploomes → SIJ → Ploomes (se falhar)</span>
+        </div>
+        <div class="meta-item">
+          <span class="meta-label">Status no wizard V2</span>
+          <span class="meta-value">Todos (transversal)</span>
+        </div>
+      </div>
+      
+    </div>
+    <div class="card" data-cat="replicar">
+      <div class="card-top">
+        <h3>Fluxo de Nova Transação → V2</h3>
+        <span class="badge" style="color:#008633;background:#EAFBEF;border:1px solid #B6E8C4">Mantém como está</span>
+      </div>
+      
+      <p class="oquefaz">Cria a transação completa no SIJ (schema v2); grava tag no card no Ploomes.</p>
+      
+      <div class="meta-row">
+        <div class="meta-item">
+          <span class="meta-label">Gatilho hoje</span>
+          <span class="meta-value">Card atualizado, no funil "Fluxo de Formalização", fase "Gerar contrato", com a tag "Campos preenchidos" e sem a tag "Inserido Sistema".</span>
+        </div>
+        <div class="meta-item">
+          <span class="meta-label">Caminho de sistemas</span>
+          <span class="meta-value">Ploomes → SIJ v2 → Ploomes</span>
+        </div>
+        <div class="meta-item">
+          <span class="meta-label">Status no wizard V2</span>
+          <span class="meta-value">Em análise / Proposta</span>
+        </div>
+      </div>
+      
+    </div>
+    <div class="card" data-cat="replicar">
+      <div class="card-top">
+        <h3>Fluxo de Cadastro Loy</h3>
+        <span class="badge" style="color:#008633;background:#EAFBEF;border:1px solid #B6E8C4">Mantém como está</span>
+      </div>
+      
+      <p class="oquefaz">Verifica se o processo já existe no Loy; cadastra o processo no ERP Loy; cria task no Ploomes se o cadastro falhar, ou atualiza o card (campo de status do protocolo) se der certo.</p>
+      
+      <div class="meta-row">
+        <div class="meta-item">
+          <span class="meta-label">Gatilho hoje</span>
+          <span class="meta-value">Processo elegível para cadastro no ERP Loy.</span>
+        </div>
+        <div class="meta-item">
+          <span class="meta-label">Caminho de sistemas</span>
+          <span class="meta-value">Ploomes → Loy → Ploomes</span>
+        </div>
+        <div class="meta-item">
+          <span class="meta-label">Status no wizard V2</span>
+          <span class="meta-value">Aguardando protocolo</span>
+        </div>
+      </div>
+      
+    </div>
+    <div class="card" data-cat="replicar">
+      <div class="card-top">
+        <h3>Fluxo de Habilitação Loy</h3>
+        <span class="badge" style="color:#008633;background:#EAFBEF;border:1px solid #B6E8C4">Mantém como está</span>
+      </div>
+      
+      <p class="oquefaz">Localiza processo no Loy, identifica o sistema (Pré/Doro/Loft), cria documentos, faz peticionamento, atualiza transação; cria task e atualiza card no Ploomes.</p>
+      <p class="note">confirmar com robôs de protocolo</p>
+      <div class="meta-row">
+        <div class="meta-item">
+          <span class="meta-label">Gatilho hoje</span>
+          <span class="meta-value">Card entra na fase "Habilitar no processo".</span>
+        </div>
+        <div class="meta-item">
+          <span class="meta-label">Caminho de sistemas</span>
+          <span class="meta-value">Ploomes → Loy → SIJ → Ploomes</span>
+        </div>
+        <div class="meta-item">
+          <span class="meta-label">Status no wizard V2</span>
+          <span class="meta-value">Aguardando protocolo / Em conferência</span>
+        </div>
+      </div>
+      
+    </div>
+    <div class="card" data-cat="replicar">
+      <div class="card-top">
+        <h3>Fluxo de Habilitação e Registro de Cessão Loy</h3>
+        <span class="badge" style="color:#008633;background:#EAFBEF;border:1px solid #B6E8C4">Mantém como está</span>
+      </div>
+      
+      <p class="oquefaz">Localiza processo no Loy, verifica/cria documentos no Ploomes, faz peticionamento, baixa e atualiza transação por ID; cria task e atualiza card no Ploomes.</p>
+      <p class="note">confirmar com robôs de protocolo</p>
+      <div class="meta-row">
+        <div class="meta-item">
+          <span class="meta-label">Gatilho hoje</span>
+          <span class="meta-value">Card apto para habilitação e registro de sessão de cessão no Loy.</span>
+        </div>
+        <div class="meta-item">
+          <span class="meta-label">Caminho de sistemas</span>
+          <span class="meta-value">Ploomes → Loy → Ploomes → SIJ → Ploomes</span>
+        </div>
+        <div class="meta-item">
+          <span class="meta-label">Status no wizard V2</span>
+          <span class="meta-value">Aguardando protocolo / Em conferência</span>
+        </div>
+      </div>
+      
+    </div>
+    <div class="card" data-cat="replicar">
+      <div class="card-top">
+        <h3>Fluxo de Habilitação e Registro de Cessão Loy v2</h3>
+        <span class="badge" style="color:#008633;background:#EAFBEF;border:1px solid #B6E8C4">Mantém como está</span>
+      </div>
+      
+      <p class="oquefaz">Mesma lógica da versão plain, rodando no schema v2 do SIJ (Baixar/Atualizar Negócio no SIJ v2).</p>
+      
+      <div class="meta-row">
+        <div class="meta-item">
+          <span class="meta-label">Gatilho hoje</span>
+          <span class="meta-value">Mesmo gatilho da linha acima, rodando no schema v2 do SIJ.</span>
+        </div>
+        <div class="meta-item">
+          <span class="meta-label">Caminho de sistemas</span>
+          <span class="meta-value">Ploomes → Loy → Ploomes → SIJ v2 → Ploomes</span>
+        </div>
+        <div class="meta-item">
+          <span class="meta-label">Status no wizard V2</span>
+          <span class="meta-value">Aguardando protocolo / Em conferência</span>
+        </div>
+      </div>
+      
+    </div>
+    <div class="card" data-cat="replicar">
+      <div class="card-top">
+        <h3>Fluxo de Pré Análise do Processo</h3>
+        <span class="badge" style="color:#008633;background:#EAFBEF;border:1px solid #B6E8C4">Mantém como está</span>
+      </div>
+      
+      <p class="oquefaz">Apura devedores de honorários, valida número CNJ, consulta histórico e primeiro grau no jusBR, consulta Datajud, extrai dados de RPV; atualiza card no Ploomes.</p>
+      
+      <div class="meta-row">
+        <div class="meta-item">
+          <span class="meta-label">Gatilho hoje</span>
+          <span class="meta-value">Processo entra na etapa de pré-análise.</span>
+        </div>
+        <div class="meta-item">
+          <span class="meta-label">Caminho de sistemas</span>
+          <span class="meta-value">Ploomes → jusBR → DataJud → MongoDB → Ploomes</span>
+        </div>
+        <div class="meta-item">
+          <span class="meta-label">Status no wizard V2</span>
+          <span class="meta-value">Em análise</span>
+        </div>
+      </div>
+      
+    </div>
+    <div class="card" data-cat="replicar">
+      <div class="card-top">
+        <h3>Precificação automática de RPVs</h3>
+        <span class="badge" style="color:#008633;background:#EAFBEF;border:1px solid #B6E8C4">Mantém como está</span>
+      </div>
+      
+      <p class="oquefaz">Calcula o deságio (dois gatilhos de entrada) e atualiza card ou cria task no Ploomes.</p>
+      <p class="note">avaliar exposição ao cliente</p>
+      <div class="meta-row">
+        <div class="meta-item">
+          <span class="meta-label">Gatilho hoje</span>
+          <span class="meta-value">Dois gatilhos de entrada (detalhe não coberto pelo manual). A confirmar no painel EDA.</span>
+        </div>
+        <div class="meta-item">
+          <span class="meta-label">Caminho de sistemas</span>
+          <span class="meta-value">Ploomes (interno)</span>
+        </div>
+        <div class="meta-item">
+          <span class="meta-label">Status no wizard V2</span>
+          <span class="meta-value">Proposta</span>
+        </div>
+      </div>
+      
+        <div class="rascunho">
+          <span class="rascunho-tag">Rascunho, validar</span>
+          <p>Rascunho: avaliar se o resultado do deságio deve ficar visível ao cliente no wizard ou só internamente.</p>
+        </div>
+    </div>
+    <div class="card" data-cat="replicar">
+      <div class="card-top">
+        <h3>Fluxo de Cálculo IR (primeira análise)</h3>
+        <span class="badge" style="color:#008633;background:#EAFBEF;border:1px solid #B6E8C4">Mantém como está</span>
+      </div>
+      
+      <p class="oquefaz">Calcula o IR dos créditos (1ª análise) e atualiza card no Ploomes.</p>
+      
+      <div class="meta-row">
+        <div class="meta-item">
+          <span class="meta-label">Gatilho hoje</span>
+          <span class="meta-value">Processo entra na primeira análise de créditos.</span>
+        </div>
+        <div class="meta-item">
+          <span class="meta-label">Caminho de sistemas</span>
+          <span class="meta-value">Ploomes (interno)</span>
+        </div>
+        <div class="meta-item">
+          <span class="meta-label">Status no wizard V2</span>
+          <span class="meta-value">Proposta</span>
+        </div>
+      </div>
+      
+    </div>
+    <div class="card" data-cat="replicar">
+      <div class="card-top">
+        <h3>Fluxo de Cálculo IR exceções</h3>
+        <span class="badge" style="color:#008633;background:#EAFBEF;border:1px solid #B6E8C4">Mantém como está</span>
+      </div>
+      
+      <p class="oquefaz">Calcula o IR dos créditos para o fluxo de exceções e atualiza card no Ploomes.</p>
+      
+      <div class="meta-row">
+        <div class="meta-item">
+          <span class="meta-label">Gatilho hoje</span>
+          <span class="meta-value">Processo entra no fluxo de exceções.</span>
+        </div>
+        <div class="meta-item">
+          <span class="meta-label">Caminho de sistemas</span>
+          <span class="meta-value">Ploomes (interno)</span>
+        </div>
+        <div class="meta-item">
+          <span class="meta-label">Status no wizard V2</span>
+          <span class="meta-value">Proposta / Depósito em andamento</span>
+        </div>
+      </div>
+      
+    </div>
+    <div class="card" data-cat="replicar">
+      <div class="card-top">
+        <h3>Fluxo de Cálculo IR Reanálise</h3>
+        <span class="badge" style="color:#008633;background:#EAFBEF;border:1px solid #B6E8C4">Mantém como está</span>
+      </div>
+      
+      <p class="oquefaz">Calcula o IR dos créditos para a segunda análise/reanálise e atualiza card no Ploomes.</p>
+      
+      <div class="meta-row">
+        <div class="meta-item">
+          <span class="meta-label">Gatilho hoje</span>
+          <span class="meta-value">Processo entra em reanálise / segunda análise.</span>
+        </div>
+        <div class="meta-item">
+          <span class="meta-label">Caminho de sistemas</span>
+          <span class="meta-value">Ploomes (interno)</span>
+        </div>
+        <div class="meta-item">
+          <span class="meta-label">Status no wizard V2</span>
+          <span class="meta-value">Proposta / Depósito em andamento</span>
+        </div>
+      </div>
+      
+    </div>
+    <div class="card" data-cat="replicar">
+      <div class="card-top">
+        <h3>Fluxo de cadastro do kit de contratos</h3>
+        <span class="badge" style="color:#008633;background:#EAFBEF;border:1px solid #B6E8C4">Mantém como está</span>
+      </div>
+      
+      <p class="oquefaz">Cria os documentos de contrato por template; atualiza card ou cria task no Ploomes.</p>
+      
+      <div class="meta-row">
+        <div class="meta-item">
+          <span class="meta-label">Gatilho hoje</span>
+          <span class="meta-value">Geração de contrato aprovada para a transação.</span>
+        </div>
+        <div class="meta-item">
+          <span class="meta-label">Caminho de sistemas</span>
+          <span class="meta-value">Ploomes (interno)</span>
+        </div>
+        <div class="meta-item">
+          <span class="meta-label">Status no wizard V2</span>
+          <span class="meta-value">Preparando contrato</span>
+        </div>
+      </div>
+      
+    </div>
+    <div class="card" data-cat="replicar">
+      <div class="card-top">
+        <h3>Fluxo de cadastro de devedores</h3>
+        <span class="badge" style="color:#008633;background:#EAFBEF;border:1px solid #B6E8C4">Mantém como está</span>
+      </div>
+      
+      <p class="oquefaz">Cadastra lote de devedores de honorários no SIJ; atualiza card ou cria task no Ploomes.</p>
+      
+      <div class="meta-row">
+        <div class="meta-item">
+          <span class="meta-label">Gatilho hoje</span>
+          <span class="meta-value">Dados de devedores de honorários preenchidos no card.</span>
+        </div>
+        <div class="meta-item">
+          <span class="meta-label">Caminho de sistemas</span>
+          <span class="meta-value">Ploomes → SIJ → Ploomes</span>
+        </div>
+        <div class="meta-item">
+          <span class="meta-label">Status no wizard V2</span>
+          <span class="meta-value">Em análise</span>
+        </div>
+      </div>
+      
+    </div>
+    <div class="card" data-cat="replicar">
+      <div class="card-top">
+        <h3>Fluxo Análise ClearSale</h3>
+        <span class="badge" style="color:#008633;background:#EAFBEF;border:1px solid #B6E8C4">Mantém como está</span>
+      </div>
+      
+      <p class="oquefaz">Busca cliente no Ploomes, executa (ou reaproveita do Mongo) a análise antifraude ClearSale; atualiza cliente e card no Ploomes.</p>
+      
+      <div class="meta-row">
+        <div class="meta-item">
+          <span class="meta-label">Gatilho hoje</span>
+          <span class="meta-value">Card entra na fase "Antecipar" ou "Análise de Exceções" com o campo fazer_analise_clearsale ativo.</span>
+        </div>
+        <div class="meta-item">
+          <span class="meta-label">Caminho de sistemas</span>
+          <span class="meta-value">Ploomes → ClearSale (ou MongoDB, se já tiver análise) → Ploomes</span>
+        </div>
+        <div class="meta-item">
+          <span class="meta-label">Status no wizard V2</span>
+          <span class="meta-value">Em análise</span>
+        </div>
+      </div>
+      
+    </div>
+    <div class="card" data-cat="replicar">
+      <div class="card-top">
+        <h3>Preencher Informações do Órgão Julgador no Pré Antecipar</h3>
+        <span class="badge" style="color:#008633;background:#EAFBEF;border:1px solid #B6E8C4">Mantém como está</span>
+      </div>
+      
+      <p class="oquefaz">Consulta o órgão julgador de primeiro grau no jusBR; atualiza card ou cria task no Ploomes.</p>
+      
+      <div class="meta-row">
+        <div class="meta-item">
+          <span class="meta-label">Gatilho hoje</span>
+          <span class="meta-value">Consulta acionada na etapa de pré-antecipar.</span>
+        </div>
+        <div class="meta-item">
+          <span class="meta-label">Caminho de sistemas</span>
+          <span class="meta-value">Ploomes → jusBR → Ploomes</span>
+        </div>
+        <div class="meta-item">
+          <span class="meta-label">Status no wizard V2</span>
+          <span class="meta-value">Em análise</span>
+        </div>
+      </div>
+      
+    </div>
+    <div class="card" data-cat="replicar">
+      <div class="card-top">
+        <h3>Fluxo sincronização atualização Ploomes (card comercial) -&gt; SIJ(prospect)</h3>
+        <span class="badge" style="color:#008633;background:#EAFBEF;border:1px solid #B6E8C4">Mantém como está</span>
+      </div>
+      
+      <p class="oquefaz">Busca prospect e cliente no SIJ pelo id do card do Ploomes; atualiza o prospect no SIJ.</p>
+      
+      <div class="meta-row">
+        <div class="meta-item">
+          <span class="meta-label">Gatilho hoje</span>
+          <span class="meta-value">Card do funil comercial atualizado no Ploomes.</span>
+        </div>
+        <div class="meta-item">
+          <span class="meta-label">Caminho de sistemas</span>
+          <span class="meta-value">Ploomes → SIJ</span>
+        </div>
+        <div class="meta-item">
+          <span class="meta-label">Status no wizard V2</span>
+          <span class="meta-value">Processo recebido</span>
+        </div>
+      </div>
+      
+    <div class="card" data-cat="replicar">
+      <div class="card-top">
+        <h3>Fluxo Atualização Cliente → V2</h3>
+        <span class="badge" style="color:#008633;background:#EAFBEF;border:1px solid #B6E8C4">Mantém como está</span>
+      </div>
+      <p class="oquefaz">Atualiza o cliente no SIJ v2 (buscar/atualizar) e cria task no Ploomes.</p>
+      <div class="meta-row">
+        <div class="meta-item">
+          <span class="meta-label">Gatilho hoje</span>
+          <span class="meta-value">A confirmar (não coberto pelo rascunho do Cláudio)</span>
+        </div>
+        <div class="meta-item">
+          <span class="meta-label">Caminho de sistemas</span>
+          <span class="meta-value">Ploomes → SIJ v2 → Ploomes</span>
+        </div>
+        <div class="meta-item">
+          <span class="meta-label">Status no wizard V2</span>
+          <span class="meta-value">Todos (transversal)</span>
+        </div>
+      </div>
+    </div>
+    </div></div>
+    </section>
+    <section class="section" data-section="naoaplica">
+      <div class="section-head">
+        <h2>Não se aplicam ao Which</h2>
+        <span class="section-count" style="color:#6D6D6E;background:#F5F5F5">9</span>
+      </div>
+      <div class="cards-grid">
+    <div class="card" data-cat="naoaplica">
+      <div class="card-top">
+        <h3>Fluxo Atualização da Análise Humana</h3>
+        <span class="badge" style="color:#6D6D6E;background:#F5F5F5;border:1px solid #E0E0E0">Não se aplica ao Which</span>
+      </div>
+
+      <p class="oquefaz">Disparado por atualização de card no Ploomes (campo resultado_analise_1a); replica o resultado da análise humana para o SIJ.</p>
+      <p class="note">Confirmado pelo Produto em 20/08: só diz respeito ao funil interno de análises, não precisa ser replicado no Wizard V2.</p>
+      <div class="meta-row">
+        <div class="meta-item">
+          <span class="meta-label">Gatilho hoje</span>
+          <span class="meta-value">Campo resultado_analise_1a atualizado no card do Ploomes.</span>
+        </div>
+        <div class="meta-item">
+          <span class="meta-label">Caminho de sistemas</span>
+          <span class="meta-value">Ploomes → SIJ</span>
+        </div>
+        <div class="meta-item">
+          <span class="meta-label">Status no wizard V2</span>
+          <span class="meta-value">Não se aplica</span>
+        </div>
+      </div>
+
+    </div>
+    <div class="card" data-cat="naoaplica">
+      <div class="card-top">
+        <h3>Fluxo de conversão para Facebook Ads - Teve um ganho</h3>
+        <span class="badge" style="color:#6D6D6E;background:#F5F5F5;border:1px solid #E0E0E0">Não se aplica ao Which</span>
+      </div>
+      
+      <p class="oquefaz">Busca cliente no Ploomes (card.fase = Proposta Aprovada) e envia evento de conversão anonimizado para o Meta Ads.</p>
+      
+      <div class="meta-row">
+        <div class="meta-item">
+          <span class="meta-label">Gatilho hoje</span>
+          <span class="meta-value">Card muda para a fase "Proposta Aprovada".</span>
+        </div>
+        <div class="meta-item">
+          <span class="meta-label">Caminho de sistemas</span>
+          <span class="meta-value">Ploomes → Meta Ads</span>
+        </div>
+        <div class="meta-item">
+          <span class="meta-label">Status no wizard V2</span>
+          <span class="meta-value">Não se aplica</span>
+        </div>
+      </div>
+      
+    </div>
+    <div class="card" data-cat="naoaplica">
+      <div class="card-top">
+        <h3>Fluxo de conversão para Facebook Ads - Recebeu proposta</h3>
+        <span class="badge" style="color:#6D6D6E;background:#F5F5F5;border:1px solid #E0E0E0">Não se aplica ao Which</span>
+      </div>
+      
+      <p class="oquefaz">Mesma lógica da linha acima, disparado quando card.fase = Proposta Enviada.</p>
+      
+      <div class="meta-row">
+        <div class="meta-item">
+          <span class="meta-label">Gatilho hoje</span>
+          <span class="meta-value">Card muda para a fase "Proposta Enviada".</span>
+        </div>
+        <div class="meta-item">
+          <span class="meta-label">Caminho de sistemas</span>
+          <span class="meta-value">Ploomes → Meta Ads</span>
+        </div>
+        <div class="meta-item">
+          <span class="meta-label">Status no wizard V2</span>
+          <span class="meta-value">Não se aplica</span>
+        </div>
+      </div>
+      
+        <div class="card" data-cat="naoaplica">
+      <div class="card-top">
+        <h3>Fluxo Form Site</h3>
+        <span class="badge" style="color:#6D6D6E;background:#F5F5F5;border:1px solid #E0E0E0">Não se aplica ao Which</span>
+      </div>
+      
+      <p class="oquefaz">Busca cliente no SIJ; busca/cria cliente e card no Ploomes a partir do formulário do site.</p>
+      <p class="note">Confirmado por UX em 20/08: não vai existir esse ponto de entrada (formulário) no Wizard V2.</p>
+      
+      <div class="meta-row">
+        <div class="meta-item">
+          <span class="meta-label">Gatilho hoje</span>
+          <span class="meta-value">origem_forms = form do site institucional (nome exato a confirmar).</span>
+        </div>
+        <div class="meta-item">
+          <span class="meta-label">Caminho de sistemas</span>
+          <span class="meta-value">Formulário → SIJ → Ploomes</span>
+        </div>
+        <div class="meta-item">
+          <span class="meta-label">Status no wizard V2</span>
+          <span class="meta-value">Não se aplica</span>
+        </div>
+      </div>
+    </div>
+    <div class="card" data-cat="naoaplica">
+      <div class="card-top">
+        <h3>Fluxo Form Zappier</h3>
+        <span class="badge" style="color:#6D6D6E;background:#F5F5F5;border:1px solid #E0E0E0">Não se aplica ao Which</span>
+      </div>
+      
+      <p class="oquefaz">Busca cliente no SIJ; cria cliente e card no Ploomes; cadastra cliente no SIJ.</p>
+      <p class="note">Confirmado por UX em 20/08: não vai existir esse ponto de entrada (formulário) no Wizard V2.</p>
+      
+      <div class="meta-row">
+        <div class="meta-item">
+          <span class="meta-label">Gatilho hoje</span>
+          <span class="meta-value">origem_forms = formulário integrado via Zapier.</span>
+        </div>
+        <div class="meta-item">
+          <span class="meta-label">Caminho de sistemas</span>
+          <span class="meta-value">Formulário → SIJ → Ploomes → SIJ</span>
+        </div>
+        <div class="meta-item">
+          <span class="meta-label">Status no wizard V2</span>
+          <span class="meta-value">Não se aplica</span>
+        </div>
+      </div>
+    </div>
+    <div class="card" data-cat="naoaplica">
+      <div class="card-top">
+        <h3>Fluxo Form Calculadora</h3>
+        <span class="badge" style="color:#6D6D6E;background:#F5F5F5;border:1px solid #E0E0E0">Não se aplica ao Which</span>
+      </div>
+      
+      <p class="oquefaz">Busca cliente no SIJ; busca/cria cliente no Ploomes; cria e atualiza card no Ploomes.</p>
+      <p class="note">Confirmado por UX em 20/08: não vai existir esse ponto de entrada (formulário) no Wizard V2.</p>
+      
+      <div class="meta-row">
+        <div class="meta-item">
+          <span class="meta-label">Gatilho hoje</span>
+          <span class="meta-value">origem_forms = "form_calculadora"; disparado quando o lead clica em "Antecipar Agora" na Calculadora de Honorários do site.</span>
+        </div>
+        <div class="meta-item">
+          <span class="meta-label">Caminho de sistemas</span>
+          <span class="meta-value">Formulário → SIJ → Ploomes</span>
+        </div>
+        <div class="meta-item">
+          <span class="meta-label">Status no wizard V2</span>
+          <span class="meta-value">Não se aplica</span>
+        </div>
+      </div>
+    </div>
+    <div class="card" data-cat="naoaplica">
+      <div class="card-top">
+        <h3>Fluxo Form de Peritos</h3>
+        <span class="badge" style="color:#6D6D6E;background:#F5F5F5;border:1px solid #E0E0E0">Não se aplica ao Which</span>
+      </div>
+      
+      <p class="oquefaz">Busca cliente no SIJ; busca/cria cliente e card no Ploomes a partir do formulário de peritos.</p>
+      <p class="note">Confirmado por UX em 20/08: não vai existir esse ponto de entrada (formulário) no Wizard V2.</p>
+      
+      <div class="meta-row">
+        <div class="meta-item">
+          <span class="meta-label">Gatilho hoje</span>
+          <span class="meta-value">origem_forms = "form_peritos".</span>
+        </div>
+        <div class="meta-item">
+          <span class="meta-label">Caminho de sistemas</span>
+          <span class="meta-value">Formulário → SIJ → Ploomes</span>
+        </div>
+        <div class="meta-item">
+          <span class="meta-label">Status no wizard V2</span>
+          <span class="meta-value">Não se aplica</span>
+        </div>
+      </div>
+    </div>
+    <div class="card" data-cat="naoaplica">
+      <div class="card-top">
+        <h3>Fluxo Form de Antecipação</h3>
+        <span class="badge" style="color:#6D6D6E;background:#F5F5F5;border:1px solid #E0E0E0">Não se aplica ao Which</span>
+      </div>
+      
+      <p class="oquefaz">Busca cliente no SIJ; busca/cria cliente e card no Ploomes a partir do formulário de antecipação.</p>
+      <p class="note">Confirmado por UX em 20/08: não vai existir esse ponto de entrada (formulário) no Wizard V2.</p>
+      
+      <div class="meta-row">
+        <div class="meta-item">
+          <span class="meta-label">Gatilho hoje</span>
+          <span class="meta-value">origem_forms = "form_antecipacao".</span>
+        </div>
+        <div class="meta-item">
+          <span class="meta-label">Caminho de sistemas</span>
+          <span class="meta-value">Formulário → SIJ → Ploomes</span>
+        </div>
+        <div class="meta-item">
+          <span class="meta-label">Status no wizard V2</span>
+          <span class="meta-value">Não se aplica</span>
+        </div>
+      </div>
+    </div>
+    <div class="card" data-cat="naoaplica">
+      <div class="card-top">
+        <h3>Fluxo Form Programa de Benefícios</h3>
+        <span class="badge" style="color:#6D6D6E;background:#F5F5F5;border:1px solid #E0E0E0">Não se aplica ao Which</span>
+      </div>
+      
+      <p class="oquefaz">Busca cliente no SIJ; cria cliente e card no Ploomes; cria anexos e cadastra o processo no Programa de Benefícios.</p>
+      <p class="note">Confirmado por UX em 20/08: não vai existir esse ponto de entrada (formulário) no Wizard V2.</p>
+      
+      <div class="meta-row">
+        <div class="meta-item">
+          <span class="meta-label">Gatilho hoje</span>
+          <span class="meta-value">origem_forms = "form_programa_de_beneficios".</span>
+        </div>
+        <div class="meta-item">
+          <span class="meta-label">Caminho de sistemas</span>
+          <span class="meta-value">Formulário → SIJ → Ploomes → Programa de Benefícios</span>
+        </div>
+        <div class="meta-item">
+          <span class="meta-label">Status no wizard V2</span>
+          <span class="meta-value">Não se aplica</span>
+        </div>
+      </div>
+    </div>
+</div></div>
+    </section>
+
+  <footer>Levantamento de automações de produto (EDA) · Wizard de Acompanhamento V2 · material de apoio para discussão com liderança de Produto e Comercial.</footer>
+</div>
+
+<script>
+function setFilter(cat, btn) {
+  document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  document.querySelectorAll('.section').forEach(sec => {
+    if (cat === 'all') { sec.style.display = ''; return; }
+    sec.style.display = sec.dataset.section === cat ? '' : 'none';
+  });
+}
+</script>
+</body>
+</html>
