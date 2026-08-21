@@ -1,0 +1,1021 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<title>Funil Which, rascunho visual</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    background: #eef0f4;
+    color: #2b2b38;
+  }
+
+  /* ---- Layout geral (réplica aproximada do Ploomes) ---- */
+  .app { display: flex; height: 100vh; min-height: 600px; }
+
+  .sidebar {
+    width: 168px;
+    background: #241a3f;
+    color: #cfc9e0;
+    flex-shrink: 0;
+    display: flex;
+    flex-direction: column;
+    padding: 14px 0;
+  }
+  .sidebar .item {
+    padding: 10px 18px;
+    font-size: 13px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    color: #b6aed1;
+  }
+  .sidebar .item.active {
+    background: #6c4cd6;
+    color: #fff;
+    border-radius: 6px;
+    margin: 0 8px;
+    width: calc(100% - 16px);
+  }
+  .sidebar .dot { width: 6px; height: 6px; border-radius: 50%; background: #8577ab; }
+  .sidebar .logo {
+    margin-top: auto;
+    padding: 14px 18px 4px;
+    font-size: 13px;
+    color: #8577ab;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .main { flex: 1; overflow: hidden; display: flex; flex-direction: column; background: #fff; }
+
+  .topbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px 20px;
+    border-bottom: 1px solid #eee;
+  }
+  .search {
+    background: #f2f1f6;
+    border-radius: 20px;
+    padding: 7px 16px;
+    font-size: 13px;
+    color: #999;
+    width: 320px;
+  }
+  .topbar-right { display: flex; align-items: center; gap: 14px; }
+  .pill-ia {
+    background: linear-gradient(90deg,#f4e6ff,#e9e6ff);
+    color: #7a49c9;
+    border-radius: 16px;
+    padding: 6px 14px;
+    font-size: 12.5px;
+    font-weight: 600;
+  }
+  .avatar-round { width: 26px; height: 26px; border-radius: 50%; background: #ddd; }
+
+  .funnelbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px 20px;
+    border-bottom: 1px solid #eee;
+  }
+  .funnel-select {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 14px;
+    font-weight: 600;
+    color: #2b2b38;
+  }
+  .funnel-select .icon { width: 18px; height: 18px; border-radius: 4px; background: #6c4cd6; }
+  .funnel-select .caret { color: #999; font-size: 11px; }
+  .funnel-list-hint {
+    font-size: 11.5px;
+    color: #999;
+    background: #f6f5fa;
+    border: 1px dashed #ddd;
+    border-radius: 6px;
+    padding: 4px 10px;
+  }
+  .new-card-btn {
+    background: #6c4cd6;
+    color: #fff;
+    padding: 8px 16px;
+    border-radius: 6px;
+    font-size: 13px;
+    font-weight: 600;
+  }
+
+  .scenario-bar {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 12px 20px;
+    background: #f8f7fb;
+    border-bottom: 1px solid #eee;
+  }
+  .scenario-label { font-size: 13px; color: #888; margin-right: 4px; }
+  .scenario-btn {
+    font-size: 13.5px;
+    font-weight: 600;
+    padding: 7px 14px;
+    border-radius: 20px;
+    background: #fff;
+    border: 1px solid #ddd;
+    color: #666;
+    cursor: pointer;
+  }
+  .scenario-btn.active {
+    background: #6c4cd6;
+    border-color: #6c4cd6;
+    color: #fff;
+  }
+  .scenario-note { font-size: 12.5px; color: #999; margin-left: 6px; }
+
+  .board-scroll {
+    flex: 1;
+    overflow-x: auto;
+    overflow-y: hidden;
+    padding: 16px 20px;
+  }
+  .board {
+    display: flex;
+    gap: 14px;
+    height: 100%;
+  }
+
+  .column {
+    width: 236px;
+    flex-shrink: 0;
+    display: flex;
+    flex-direction: column;
+  }
+  .col-head {
+    padding: 2px 4px 10px;
+    border-top: 3px solid #ccc;
+  }
+  .col-head .title {
+    font-size: 14.5px;
+    font-weight: 700;
+    color: #2b2b38;
+    line-height: 1.3;
+  }
+  .col-head .client-view { font-size: 11.5px; color: #a39fb0; margin-top: 3px; font-style: italic; }
+  .col-head .count { font-size: 12px; color: #999; margin-top: 4px; }
+  .col-head .origin-tag {
+    display: inline-block;
+    margin-top: 6px;
+    font-size: 10.5px;
+    font-weight: 700;
+    letter-spacing: .02em;
+    text-transform: uppercase;
+    padding: 2px 7px;
+    border-radius: 4px;
+  }
+
+  .cards { display: flex; flex-direction: column; gap: 8px; }
+  .card {
+    background: #fff;
+    border: 1px solid #ececf2;
+    border-radius: 8px;
+    box-shadow: 0 1px 2px rgba(20,10,50,0.05);
+    padding: 10px 10px 8px;
+  }
+  .card .name { font-size: 13.5px; font-weight: 700; color: #2b2b38; }
+  .card .sub { font-size: 12px; color: #9a97a8; margin-top: 1px; margin-bottom: 8px; }
+  .card .row { display: flex; align-items: center; justify-content: space-between; }
+  .card .tags { display: flex; gap: 3px; }
+  .tag-dot { width: 9px; height: 9px; border-radius: 2px; }
+  .card .day-badge {
+    font-size: 11px;
+    color: #888;
+    background: #f2f1f6;
+    border-radius: 4px;
+    padding: 1px 6px;
+  }
+  .card .avatar {
+    width: 18px; height: 18px; border-radius: 50%; background: #d8d2ea;
+    display: inline-block; margin-top: 6px;
+  }
+
+  .empty-hint {
+    font-size: 12px;
+    color: #bbb;
+    font-style: italic;
+    padding: 6px 2px;
+  }
+
+  .column.pending {
+    background: #fdf6ea;
+    border: 1px dashed #e6bd6e;
+    border-radius: 10px;
+    padding: 6px;
+    margin: -6px -6px 0;
+  }
+  .pending-flag {
+    display: inline-block;
+    font-size: 10.5px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: .02em;
+    color: #a3711a;
+    background: #fbe6bd;
+    border-radius: 4px;
+    padding: 1px 6px;
+    margin-top: 6px;
+    margin-left: 6px;
+  }
+
+  /* origem cores */
+  .o-comercial { border-top-color: #3fae6a; }
+  .o-comercial .origin-tag { background: #e6f6ec; color: #23824c; }
+  .o-analise { border-top-color: #2fb0b0; }
+  .o-analise .origin-tag { background: #e4f7f7; color: #1c7d7d; }
+  .o-formalizacao { border-top-color: #4a6cf7; }
+  .o-formalizacao .origin-tag { background: #eaefff; color: #3350c9; }
+  .o-condicional { border-top-color: #e0912b; }
+  .o-condicional .origin-tag { background: #fdf1e2; color: #a86414; }
+  .o-final { border-top-color: #9a97a8; }
+  .o-final .origin-tag { background: #f0eff4; color: #6b6878; }
+  .o-posganho { border-top-color: #b23fae; }
+  .o-posganho .origin-tag { background: #fbe6f5; color: #8a2f82; }
+
+  .col-head .trigger {
+    font-size: 11px;
+    color: #6b6878;
+    line-height: 1.35;
+    margin-top: 4px;
+  }
+  .stage-status-new {
+    display: inline-block;
+    margin-top: 6px;
+    margin-left: 6px;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: .02em;
+    text-transform: uppercase;
+    padding: 2px 7px;
+    border-radius: 4px;
+    background: #fde8e7;
+    color: #c0392b;
+  }
+  .legend {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+    font-size: 11.5px;
+    color: #777;
+    padding: 8px 20px;
+    background: #fffaf4;
+    border-bottom: 1px solid #eee;
+  }
+  .legend b { color: #555; }
+  .legend .swatch-new {
+    display: inline-block;
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: .02em;
+    padding: 2px 7px;
+    border-radius: 4px;
+    background: #fde8e7;
+    color: #c0392b;
+  }
+  .pill-tag {
+    font-size: 10.5px;
+    font-weight: 700;
+    color: #8a2f82;
+    background: #fbe6f5;
+    border-radius: 4px;
+    padding: 1px 6px;
+  }
+</style>
+</head>
+<body>
+
+<div class="app">
+  <div class="sidebar">
+    <div class="item">Operação</div>
+    <div class="item">Resumo</div>
+    <div class="item">Clientes</div>
+    <div class="item active">Fluxos</div>
+    <div class="item">Documentos</div>
+    <div class="item">Produtos</div>
+    <div class="item">Relatórios</div>
+    <div class="item">Administração</div>
+    <div class="logo">Ploomes</div>
+  </div>
+
+  <div class="main">
+    <div class="topbar">
+      <div class="search">Busque em qualquer lugar</div>
+      <div class="topbar-right">
+        <div class="pill-ia">✦ Ploomes IA</div>
+        <div class="avatar-round"></div>
+      </div>
+    </div>
+
+    <div class="funnelbar">
+      <div class="funnel-select">
+        <span class="icon"></span> Funil Which (proposta) <span class="caret">▾</span>
+        <span class="funnel-list-hint">novo, ao lado de Funil Comercial / Fluxo de Análises / Fluxo de Formalização</span>
+      </div>
+      <div class="new-card-btn">+ Novo Negócio</div>
+    </div>
+
+    <div class="scenario-bar">
+      <span class="scenario-label">Cenário:</span>
+      <button class="scenario-btn active" id="btn-manual" onclick="showScenario('manual')">Manual (hoje)</button>
+      <button class="scenario-btn" id="btn-auto" onclick="showScenario('auto')">Automático (se as 3 pendências forem automatizadas)</button>
+      <span class="scenario-note" id="scenario-note">17 etapas, com Montar proposta, Solicitar documentos, Protocolo do cliente e Ajuste no protocolo como etapas próprias</span>
+    </div>
+
+
+    <div class="legend">
+      <span><b>Gatilho</b>: texto cinza abaixo do nome da etapa, explica como o card chega ali hoje.</span>
+      <span><span class="swatch-new">Novo, criar no Ploomes</span> etapa que ainda não existe como estágio hoje, precisa ser criada. Sem selo = já existe hoje em algum dos 3 funis.</span>
+    </div>
+    <div class="board-scroll" id="board-manual">
+      <div class="board">
+
+        <div class="column">
+          <div class="col-head o-comercial">
+            <div class="title">Enviou Processo</div>
+            <div class="client-view">Cliente vê: Processo recebido</div>
+            <div class="trigger">Cliente envia o processo pela plataforma, cria/sincroniza o card</div>
+            <div class="count">1 negócio</div>
+          </div>
+          <div class="cards">
+            <div class="card">
+              <div class="name">Fernanda Rocha - 0001234-...</div>
+              <div class="sub">Fernanda Rocha</div>
+              <div class="row"><div class="tags"><span class="tag-dot" style="background:#3fae6a"></span></div><span class="day-badge">0d</span></div>
+              <div class="avatar"></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="column">
+          <div class="col-head o-analise">
+            <div class="title">Em análise</div>
+            <div class="trigger">Automático, ao preencher o número do processo</div>
+            <div class="count">3 negócios</div>
+            <span class="origin-tag">Análise</span>
+          </div>
+          <div class="cards">
+            <div class="card">
+              <div class="name">Marcos Vinícius Lima...</div>
+              <div class="sub">Marcos Vinícius</div>
+              <div class="row"><div class="tags"><span class="tag-dot" style="background:#2fb0b0"></span><span class="tag-dot" style="background:#e0912b"></span></div><span class="day-badge">2d</span></div>
+              <div class="avatar"></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="column">
+          <div class="col-head o-analise">
+            <div class="title">Cópias</div>
+            <div class="client-view">Cliente vê: Aguardando acesso ao processo</div>
+            <div class="trigger">Hoje o Jurídico identifica manualmente que falta cópia ou chave de acesso e move o card. Ideia: um campo “segredo de justiça, sim ou não” preenchido no envio poderia rotear direto pra cá quando marcado, caindo pra análise humana quando não preenchido.</div>
+            <div class="count">1 negócio</div>
+            <span class="origin-tag">Análise</span>
+          </div>
+          <div class="cards">
+            <div class="card">
+              <div class="name">Helena Duarte - 0009988...</div>
+              <div class="sub">Helena Duarte</div>
+              <div class="row"><div class="tags"><span class="tag-dot" style="background:#2fb0b0"></span></div><span class="day-badge">5d</span></div>
+              <div class="avatar"></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="column pending">
+          <div class="col-head o-comercial">
+            <div class="title">Montar proposta</div>
+            <div class="trigger">Análise aprova o processo; hoje sem aviso automático, o Closer monta a proposta manualmente</div>
+            <span class="pending-flag">Pendente de automação</span>
+            <div class="count">2 negócios · interna, cliente não vê</div>
+            <span class="stage-status-new">Novo, criar no Ploomes</span>
+          </div>
+          <div class="cards">
+            <div class="card">
+              <div class="name">Ricardo Nunes - 0004521...</div>
+              <div class="sub">Ricardo Nunes</div>
+              <div class="row"><div class="tags"><span class="tag-dot" style="background:#3fae6a"></span></div><span class="day-badge">1d</span></div>
+              <div class="avatar"></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="column">
+          <div class="col-head o-comercial">
+            <div class="title">Proposta enviada</div>
+            <div class="client-view">Cliente vê: Proposta disponível</div>
+            <div class="trigger">Closer registra e envia a proposta, anexa o PDF</div>
+            <div class="count">4 negócios</div>
+          </div>
+          <div class="cards">
+            <div class="card">
+              <div class="name">Juliana Prado - 0007733...</div>
+              <div class="sub">Juliana Prado</div>
+              <div class="row"><div class="tags"><span class="tag-dot" style="background:#3fae6a"></span><span class="tag-dot" style="background:#4a6cf7"></span></div><span class="day-badge">0d</span></div>
+              <div class="avatar"></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="column pending">
+          <div class="col-head o-formalizacao">
+            <div class="title">Solicitar documentos</div>
+            <div class="trigger">Formalização identifica documento faltante antes do contrato; hoje sem stage próprio</div>
+            <span class="pending-flag">Pendente de automação</span>
+            <div class="count">1 negócio · interna, cliente não vê</div>
+            <span class="origin-tag">Formalização</span>
+            <span class="stage-status-new">Novo, criar no Ploomes</span>
+          </div>
+          <div class="cards">
+            <div class="card">
+              <div class="name">Otávio Melo - 0002210-...</div>
+              <div class="sub">Otávio Melo</div>
+              <div class="row"><div class="tags"><span class="tag-dot" style="background:#4a6cf7"></span></div><span class="day-badge">1d</span></div>
+              <div class="avatar"></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="column">
+          <div class="col-head o-formalizacao">
+            <div class="title">Aguardando documentos do cliente</div>
+            <div class="client-view">Cliente vê: Aguardando seus documentos</div>
+            <div class="trigger">Duas origens: pedido inicial (Solicitar documentos) ou durante Preparando contrato</div>
+            <div class="count">1 negócio · condicional</div>
+            <span class="origin-tag">Formalização</span>
+            <span class="stage-status-new">Novo, criar no Ploomes</span>
+          </div>
+          <div class="cards">
+            <div class="card">
+              <div class="name">Otávio Melo - 0002210-...</div>
+              <div class="sub">Otávio Melo</div>
+              <div class="row"><div class="tags"><span class="tag-dot" style="background:#4a6cf7"></span></div><span class="day-badge">3d</span></div>
+              <div class="avatar"></div>
+            </div>
+            <div class="empty-hint">⇠ 2 origens: Solicitar documentos (antes) e Preparando contrato (durante, se faltar algo)</div>
+          </div>
+        </div>
+
+        <div class="column">
+          <div class="col-head o-formalizacao">
+            <div class="title">Preparando contrato</div>
+            <div class="trigger">Automático, ao aprovar a proposta (Proposta Aprovada)</div>
+            <div class="count">2 negócios</div>
+            <span class="origin-tag">Formalização</span>
+          </div>
+          <div class="cards">
+            <div class="card">
+              <div class="name">Camila Freitas - 0003398...</div>
+              <div class="sub">Camila Freitas</div>
+              <div class="row"><div class="tags"><span class="tag-dot" style="background:#4a6cf7"></span></div><span class="day-badge">0d</span></div>
+              <div class="avatar"></div>
+            </div>
+            <div class="empty-hint">↩ pode voltar para "Aguardando documentos do cliente" se faltar algo, ação nova a criar aqui</div>
+          </div>
+        </div>
+
+        <div class="column">
+          <div class="col-head o-formalizacao">
+            <div class="title">Assinatura do cliente</div>
+            <div class="client-view">Cliente vê: Aguardando sua assinatura</div>
+            <div class="trigger">Automático, n8n cria o envelope ao validar o contrato</div>
+            <div class="count">3 negócios</div>
+            <span class="origin-tag">Formalização</span>
+          </div>
+          <div class="cards">
+            <div class="card">
+              <div class="name">Bruno Salles - 0006654-...</div>
+              <div class="sub">Bruno Salles</div>
+              <div class="row"><div class="tags"><span class="tag-dot" style="background:#4a6cf7"></span></div><span class="day-badge">1d</span></div>
+              <div class="avatar"></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="column pending">
+          <div class="col-head o-formalizacao">
+            <div class="title">Protocolo do cliente</div>
+            <div class="client-view">Cliente vê: Aguardando protocolo</div>
+            <div class="trigger">Automático, webhook move o card após a assinatura</div>
+            <span class="pending-flag">Pendente de automação</span>
+            <div class="count">1 negócio</div>
+            <span class="origin-tag">Formalização</span>
+          </div>
+          <div class="cards">
+            <div class="card">
+              <div class="name">Patrícia Assis - 0008812...</div>
+              <div class="sub">Patrícia Assis</div>
+              <div class="row"><div class="tags"><span class="tag-dot" style="background:#4a6cf7"></span></div><span class="day-badge">2d</span></div>
+              <div class="avatar"></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="column">
+          <div class="col-head o-formalizacao">
+            <div class="title">Verificar protocolo</div>
+            <div class="client-view">Cliente vê: Em conferência</div>
+            <div class="trigger">Formalizador confere após receber o comprovante do protocolo</div>
+            <div class="count">1 negócio</div>
+            <span class="origin-tag">Formalização</span>
+          </div>
+          <div class="cards">
+            <div class="card">
+              <div class="name">Vitor Hugo Reis - 0001129...</div>
+              <div class="sub">Vitor Hugo Reis</div>
+              <div class="row"><div class="tags"><span class="tag-dot" style="background:#4a6cf7"></span></div><span class="day-badge">0d</span></div>
+              <div class="avatar"></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="column">
+          <div class="col-head o-condicional">
+            <div class="title">Ajuste no protocolo (condicional)</div>
+            <div class="client-view">Cliente vê: Aguardando ajuste no protocolo</div>
+            <div class="trigger">Formalizador marca o erro no protocolo no card</div>
+            <div class="count">0 negócios · condicional</div>
+            <span class="origin-tag">Condicional</span>
+            <span class="stage-status-new">Novo, criar no Ploomes</span>
+          </div>
+          <div class="cards">
+            <div class="empty-hint">só aparece quando a conferência acha erro</div>
+          </div>
+        </div>
+
+        <div class="column">
+          <div class="col-head o-condicional">
+            <div class="title">Aguardando cessão pública (condicional)</div>
+            <div class="client-view">Cliente vê: Aguardando a sessão pública</div>
+            <div class="trigger">Depende de agendamento do tabelionato</div>
+            <div class="count">1 negócio · condicional</div>
+            <span class="origin-tag">Condicional</span>
+          </div>
+          <div class="cards">
+            <div class="card">
+              <div class="name">Sérgio Batista - 0005567...</div>
+              <div class="sub">Sérgio Batista</div>
+              <div class="row"><div class="tags"><span class="tag-dot" style="background:#e0912b"></span></div><span class="day-badge">10d</span></div>
+              <div class="avatar"></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="column">
+          <div class="col-head o-condicional">
+            <div class="title">Aguarda homologação (condicional)</div>
+            <div class="client-view">Cliente vê: Depósito em andamento (sem status próprio)</div>
+            <div class="trigger">Trava o pagamento até a Justiça homologar o acordo</div>
+            <div class="count">1 negócio · condicional, pré-Ganho</div>
+            <span class="origin-tag">Condicional</span>
+            <span class="stage-status-new">Novo, criar no Ploomes</span>
+          </div>
+          <div class="cards">
+            <div class="card">
+              <div class="name">Aline Meireles - 0004488...</div>
+              <div class="sub">Aline Meireles</div>
+              <div class="row"><div class="tags"><span class="tag-dot" style="background:#e0912b"></span></div><span class="day-badge">6d</span></div>
+              <div class="avatar"></div>
+            </div>
+            <div class="empty-hint">trava o pagamento, diferente da coluna "Pendências" (que é só pós-Ganho)</div>
+          </div>
+        </div>
+
+        <div class="column">
+          <div class="col-head o-formalizacao">
+            <div class="title">Pagamento do cliente</div>
+            <div class="client-view">Cliente vê: Depósito em andamento</div>
+            <div class="trigger">Formalizador move após a conferência</div>
+            <div class="count">2 negócios</div>
+            <span class="origin-tag">Formalização</span>
+          </div>
+          <div class="cards">
+            <div class="card">
+              <div class="name">Renata Barbosa - 0004490...</div>
+              <div class="sub">Renata Barbosa</div>
+              <div class="row"><div class="tags"><span class="tag-dot" style="background:#4a6cf7"></span></div><span class="day-badge">1d</span></div>
+              <div class="avatar"></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="column">
+          <div class="col-head o-formalizacao">
+            <div class="title">Concluído</div>
+            <div class="trigger">Financeiro marca pagamento concluído</div>
+            <div class="count">6 negócios</div>
+            <span class="origin-tag">Formalização</span>
+          </div>
+          <div class="cards">
+            <div class="card">
+              <div class="name">Diego Fontoura - 0002287...</div>
+              <div class="sub">Diego Fontoura</div>
+              <div class="row"><div class="tags"><span class="tag-dot" style="background:#4a6cf7"></span></div><span class="day-badge">14d</span></div>
+              <div class="avatar"></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="column">
+          <div class="col-head o-posganho">
+            <div class="title">Pendências</div>
+            <div class="client-view">Cliente não vê, é só para a operação</div>
+            <div class="trigger">Sincronização SIJ → Ploomes, entra em “Devolver” ou “Cliente deve IR”</div>
+            <div class="count">3 negócios · só pós-Ganho</div>
+            <span class="origin-tag">SIJ → Ploomes</span>
+            <span class="stage-status-new">Novo, criar no Ploomes</span>
+          </div>
+          <div class="cards">
+            <div class="card">
+              <div class="name">Renato Cardoso - 0005541...</div>
+              <div class="sub">Renato Cardoso</div>
+              <div class="row"><span class="pill-tag">Modelo 50%</span></div>
+            </div>
+            <div class="card">
+              <div class="name">Simone Alves - 0006623...</div>
+              <div class="sub">Simone Alves</div>
+              <div class="row"><span class="pill-tag">Deságio flexível</span></div>
+            </div>
+            <div class="card">
+              <div class="name">Paulo Ricardo - 0007890...</div>
+              <div class="sub">Paulo Ricardo</div>
+              <div class="row"><span class="pill-tag">Devolução de IR</span></div>
+            </div>
+            <div class="empty-hint">entra vindo de Ganhos por sincronização SIJ → Ploomes (status "Devolver" ou "Cliente deve IR"), sai quando o Financeiro registra a devolução</div>
+          </div>
+        </div>
+
+        <div class="column">
+          <div class="col-head o-final">
+            <div class="title">Negativa enviada</div>
+            <div class="client-view">Cliente vê: Processo não aprovado</div>
+            <div class="trigger">Análise ou Comercial envia negativa, card vai para Perdidos</div>
+            <div class="count">1 negócio</div>
+            <span class="origin-tag">Análise / Comercial</span>
+          </div>
+          <div class="cards">
+            <div class="card">
+              <div class="name">Igor Salgado - 0007701-...</div>
+              <div class="sub">Igor Salgado</div>
+              <div class="row"><div class="tags"><span class="tag-dot" style="background:#9a97a8"></span></div><span class="day-badge">0d</span></div>
+              <div class="avatar"></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="column">
+          <div class="col-head o-final">
+            <div class="title">Negociação encerrada</div>
+            <div class="trigger">Comercial marca Perdidos e registra o motivo</div>
+            <div class="count">2 negócios</div>
+          </div>
+          <div class="cards">
+            <div class="card">
+              <div class="name">Alexandre Vieira - 0003350...</div>
+              <div class="sub">Alexandre Vieira</div>
+              <div class="row"><div class="tags"><span class="tag-dot" style="background:#9a97a8"></span></div><span class="day-badge">30d</span></div>
+              <div class="avatar"></div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <div class="board-scroll" id="board-auto" style="display:none">
+      <div class="board">
+
+        <div class="column">
+          <div class="col-head o-comercial">
+            <div class="title">Enviou Processo</div>
+            <div class="client-view">Cliente vê: Processo recebido</div>
+            <div class="trigger">Cliente envia o processo pela plataforma, cria/sincroniza o card</div>
+            <div class="count">1 negócio</div>
+          </div>
+          <div class="cards">
+            <div class="card">
+              <div class="name">Fernanda Rocha - 0001234-...</div>
+              <div class="sub">Fernanda Rocha</div>
+              <div class="row"><div class="tags"><span class="tag-dot" style="background:#3fae6a"></span></div><span class="day-badge">0d</span></div>
+              <div class="avatar"></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="column">
+          <div class="col-head o-analise">
+            <div class="title">Em análise</div>
+            <div class="trigger">Automático, ao preencher o número do processo</div>
+            <div class="count">3 negócios</div>
+            <span class="origin-tag">Análise</span>
+          </div>
+          <div class="cards">
+            <div class="card">
+              <div class="name">Marcos Vinícius Lima...</div>
+              <div class="sub">Marcos Vinícius</div>
+              <div class="row"><div class="tags"><span class="tag-dot" style="background:#2fb0b0"></span><span class="tag-dot" style="background:#e0912b"></span></div><span class="day-badge">2d</span></div>
+              <div class="avatar"></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="column">
+          <div class="col-head o-analise">
+            <div class="title">Cópias</div>
+            <div class="client-view">Cliente vê: Aguardando acesso ao processo</div>
+            <div class="trigger">Hoje o Jurídico identifica manualmente que falta cópia ou chave de acesso e move o card. Ideia: um campo “segredo de justiça, sim ou não” preenchido no envio poderia rotear direto pra cá quando marcado, caindo pra análise humana quando não preenchido.</div>
+            <div class="count">1 negócio</div>
+            <span class="origin-tag">Análise</span>
+          </div>
+          <div class="cards">
+            <div class="card">
+              <div class="name">Helena Duarte - 0009988...</div>
+              <div class="sub">Helena Duarte</div>
+              <div class="row"><div class="tags"><span class="tag-dot" style="background:#2fb0b0"></span></div><span class="day-badge">5d</span></div>
+              <div class="avatar"></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="column">
+          <div class="col-head o-comercial">
+            <div class="title">Proposta enviada</div>
+            <div class="client-view">Cliente vê: Proposta disponível</div>
+            <div class="trigger">Proposta montada automaticamente pela análise aprovada, sem passar por Montar proposta</div>
+            <div class="count">4 negócios</div>
+          </div>
+          <div class="cards">
+            <div class="card">
+              <div class="name">Juliana Prado - 0007733...</div>
+              <div class="sub">Juliana Prado</div>
+              <div class="row"><div class="tags"><span class="tag-dot" style="background:#3fae6a"></span><span class="tag-dot" style="background:#4a6cf7"></span></div><span class="day-badge">0d</span></div>
+              <div class="avatar"></div>
+            </div>
+            <div class="empty-hint">proposta montada automaticamente, sem passar por "Montar proposta"</div>
+          </div>
+        </div>
+
+        <div class="column">
+          <div class="col-head o-formalizacao">
+            <div class="title">Aguardando documentos do cliente</div>
+            <div class="client-view">Cliente vê: Aguardando seus documentos</div>
+            <div class="trigger">Plataforma pede sozinha o que falta antes do contrato; ainda pode vir de Preparando contrato</div>
+            <div class="count">1 negócio · condicional</div>
+            <span class="origin-tag">Formalização</span>
+            <span class="stage-status-new">Novo, criar no Ploomes</span>
+          </div>
+          <div class="cards">
+            <div class="card">
+              <div class="name">Otávio Melo - 0002210-...</div>
+              <div class="sub">Otávio Melo</div>
+              <div class="row"><div class="tags"><span class="tag-dot" style="background:#4a6cf7"></span></div><span class="day-badge">3d</span></div>
+              <div class="avatar"></div>
+            </div>
+            <div class="empty-hint">⇠ plataforma pede sozinha o que falta antes do contrato, sem passar por "Solicitar documentos". Mas ainda recebe de "Preparando contrato" se faltar algo durante</div>
+          </div>
+        </div>
+
+        <div class="column">
+          <div class="col-head o-formalizacao">
+            <div class="title">Preparando contrato</div>
+            <div class="trigger">Automático, ao aprovar a proposta (Proposta Aprovada)</div>
+            <div class="count">2 negócios</div>
+            <span class="origin-tag">Formalização</span>
+          </div>
+          <div class="cards">
+            <div class="card">
+              <div class="name">Camila Freitas - 0003398...</div>
+              <div class="sub">Camila Freitas</div>
+              <div class="row"><div class="tags"><span class="tag-dot" style="background:#4a6cf7"></span></div><span class="day-badge">0d</span></div>
+              <div class="avatar"></div>
+            </div>
+            <div class="empty-hint">↩ pode voltar para "Aguardando documentos do cliente" se faltar algo, ação nova a criar aqui</div>
+          </div>
+        </div>
+
+        <div class="column">
+          <div class="col-head o-formalizacao">
+            <div class="title">Assinatura do cliente</div>
+            <div class="client-view">Cliente vê: Aguardando sua assinatura</div>
+            <div class="trigger">Automático, n8n cria o envelope ao validar o contrato</div>
+            <div class="count">3 negócios</div>
+            <span class="origin-tag">Formalização</span>
+          </div>
+          <div class="cards">
+            <div class="card">
+              <div class="name">Bruno Salles - 0006654-...</div>
+              <div class="sub">Bruno Salles</div>
+              <div class="row"><div class="tags"><span class="tag-dot" style="background:#4a6cf7"></span></div><span class="day-badge">1d</span></div>
+              <div class="avatar"></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="column">
+          <div class="col-head o-formalizacao">
+            <div class="title">Protocolando</div>
+            <div class="client-view">Cliente vê: Aguardando protocolo</div>
+            <div class="trigger">Robô protocola sozinho, sem esperar o cliente (roadmap, ainda não existe)</div>
+            <div class="count">1 negócio</div>
+            <span class="origin-tag">Formalização (robô)</span>
+            <span class="stage-status-new">Novo, criar no Ploomes</span>
+          </div>
+          <div class="cards">
+            <div class="card">
+              <div class="name">Patrícia Assis - 0008812...</div>
+              <div class="sub">Patrícia Assis</div>
+              <div class="row"><div class="tags"><span class="tag-dot" style="background:#4a6cf7"></span></div><span class="day-badge">0d</span></div>
+              <div class="avatar"></div>
+            </div>
+            <div class="empty-hint">robô protocola sozinho, sem esperar o cliente</div>
+          </div>
+        </div>
+
+        <div class="column">
+          <div class="col-head o-formalizacao">
+            <div class="title">Verificar protocolo</div>
+            <div class="client-view">Cliente vê: Em conferência</div>
+            <div class="trigger">Checagem humana do que o robô protocolou</div>
+            <div class="count">1 negócio</div>
+            <span class="origin-tag">Formalização</span>
+          </div>
+          <div class="cards">
+            <div class="card">
+              <div class="name">Vitor Hugo Reis - 0001129...</div>
+              <div class="sub">Vitor Hugo Reis</div>
+              <div class="row"><div class="tags"><span class="tag-dot" style="background:#4a6cf7"></span></div><span class="day-badge">0d</span></div>
+              <div class="avatar"></div>
+            </div>
+            <div class="empty-hint">checagem humana do que o robô protocolou, sem o "Ajuste no protocolo" (esse erro é do cliente, não deveria acontecer com o robô)</div>
+          </div>
+        </div>
+
+        <div class="column">
+          <div class="col-head o-condicional">
+            <div class="title">Aguardando cessão pública (condicional)</div>
+            <div class="client-view">Cliente vê: Aguardando a sessão pública</div>
+            <div class="trigger">Depende de agendamento do tabelionato</div>
+            <div class="count">1 negócio · condicional</div>
+            <span class="origin-tag">Condicional</span>
+          </div>
+          <div class="cards">
+            <div class="card">
+              <div class="name">Sérgio Batista - 0005567...</div>
+              <div class="sub">Sérgio Batista</div>
+              <div class="row"><div class="tags"><span class="tag-dot" style="background:#e0912b"></span></div><span class="day-badge">10d</span></div>
+              <div class="avatar"></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="column">
+          <div class="col-head o-condicional">
+            <div class="title">Aguarda homologação (condicional)</div>
+            <div class="client-view">Cliente vê: Depósito em andamento (sem status próprio)</div>
+            <div class="trigger">Trava o pagamento até a Justiça homologar o acordo</div>
+            <div class="count">1 negócio · condicional, pré-Ganho</div>
+            <span class="origin-tag">Condicional</span>
+            <span class="stage-status-new">Novo, criar no Ploomes</span>
+          </div>
+          <div class="cards">
+            <div class="card">
+              <div class="name">Aline Meireles - 0004488...</div>
+              <div class="sub">Aline Meireles</div>
+              <div class="row"><div class="tags"><span class="tag-dot" style="background:#e0912b"></span></div><span class="day-badge">6d</span></div>
+              <div class="avatar"></div>
+            </div>
+            <div class="empty-hint">trava o pagamento, diferente da coluna "Pendências" (que é só pós-Ganho)</div>
+          </div>
+        </div>
+
+        <div class="column">
+          <div class="col-head o-formalizacao">
+            <div class="title">Pagamento do cliente</div>
+            <div class="client-view">Cliente vê: Depósito em andamento</div>
+            <div class="trigger">Formalizador move após a conferência</div>
+            <div class="count">2 negócios</div>
+            <span class="origin-tag">Formalização</span>
+          </div>
+          <div class="cards">
+            <div class="card">
+              <div class="name">Renata Barbosa - 0004490...</div>
+              <div class="sub">Renata Barbosa</div>
+              <div class="row"><div class="tags"><span class="tag-dot" style="background:#4a6cf7"></span></div><span class="day-badge">1d</span></div>
+              <div class="avatar"></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="column">
+          <div class="col-head o-formalizacao">
+            <div class="title">Concluído</div>
+            <div class="trigger">Financeiro marca pagamento concluído</div>
+            <div class="count">6 negócios</div>
+            <span class="origin-tag">Formalização</span>
+          </div>
+          <div class="cards">
+            <div class="card">
+              <div class="name">Diego Fontoura - 0002287...</div>
+              <div class="sub">Diego Fontoura</div>
+              <div class="row"><div class="tags"><span class="tag-dot" style="background:#4a6cf7"></span></div><span class="day-badge">14d</span></div>
+              <div class="avatar"></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="column">
+          <div class="col-head o-posganho">
+            <div class="title">Pendências</div>
+            <div class="client-view">Cliente não vê, é só para a operação</div>
+            <div class="trigger">Sincronização SIJ → Ploomes, entra em “Devolver” ou “Cliente deve IR”</div>
+            <div class="count">3 negócios · só pós-Ganho</div>
+            <span class="origin-tag">SIJ → Ploomes</span>
+            <span class="stage-status-new">Novo, criar no Ploomes</span>
+          </div>
+          <div class="cards">
+            <div class="card">
+              <div class="name">Renato Cardoso - 0005541...</div>
+              <div class="sub">Renato Cardoso</div>
+              <div class="row"><span class="pill-tag">Modelo 50%</span></div>
+            </div>
+            <div class="card">
+              <div class="name">Simone Alves - 0006623...</div>
+              <div class="sub">Simone Alves</div>
+              <div class="row"><span class="pill-tag">Deságio flexível</span></div>
+            </div>
+            <div class="card">
+              <div class="name">Paulo Ricardo - 0007890...</div>
+              <div class="sub">Paulo Ricardo</div>
+              <div class="row"><span class="pill-tag">Devolução de IR</span></div>
+            </div>
+            <div class="empty-hint">entra vindo de Ganhos por sincronização SIJ → Ploomes (status "Devolver" ou "Cliente deve IR"), sai quando o Financeiro registra a devolução</div>
+          </div>
+        </div>
+
+        <div class="column">
+          <div class="col-head o-final">
+            <div class="title">Negativa enviada</div>
+            <div class="client-view">Cliente vê: Processo não aprovado</div>
+            <div class="trigger">Análise ou Comercial envia negativa, card vai para Perdidos</div>
+            <div class="count">1 negócio</div>
+            <span class="origin-tag">Análise / Comercial</span>
+          </div>
+          <div class="cards">
+            <div class="card">
+              <div class="name">Igor Salgado - 0007701-...</div>
+              <div class="sub">Igor Salgado</div>
+              <div class="row"><div class="tags"><span class="tag-dot" style="background:#9a97a8"></span></div><span class="day-badge">0d</span></div>
+              <div class="avatar"></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="column">
+          <div class="col-head o-final">
+            <div class="title">Negociação encerrada</div>
+            <div class="trigger">Comercial marca Perdidos e registra o motivo</div>
+            <div class="count">2 negócios</div>
+          </div>
+          <div class="cards">
+            <div class="card">
+              <div class="name">Alexandre Vieira - 0003350...</div>
+              <div class="sub">Alexandre Vieira</div>
+              <div class="row"><div class="tags"><span class="tag-dot" style="background:#9a97a8"></span></div><span class="day-badge">30d</span></div>
+              <div class="avatar"></div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  function showScenario(which) {
+    document.getElementById('board-manual').style.display = which === 'manual' ? 'block' : 'none';
+    document.getElementById('board-auto').style.display = which === 'auto' ? 'block' : 'none';
+    document.getElementById('btn-manual').classList.toggle('active', which === 'manual');
+    document.getElementById('btn-auto').classList.toggle('active', which === 'auto');
+    document.getElementById('scenario-note').textContent = which === 'manual'
+      ? '17 etapas, com Montar proposta, Solicitar documentos, Protocolo do cliente e Ajuste no protocolo como etapas próprias'
+      : '14 etapas, Montar proposta e Solicitar documentos somem, Protocolo do cliente vira Protocolando (robô) e Ajuste no protocolo some junto';
+  }
+</script>
+
+</body>
+</html>
