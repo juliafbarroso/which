@@ -54,6 +54,7 @@
   .card-top h3 { font-size: 14.5px; font-weight: 700; color: #171717; line-height: 1.3; }
   .badge { font-size: 10.5px; font-weight: 700; padding: 3px 9px; border-radius: 999px; white-space: nowrap; flex-shrink:0; }
   .flag-skeleton { display:inline-block; font-size: 10.5px; font-weight: 700; color: #9D231C; background: #FEF2EC; border-radius: 6px; padding: 2px 8px; width: fit-content; }
+  .flag-n8n { display:inline-block; font-size: 10.5px; font-weight: 700; color: #207AC3; background: #ECF5FE; border-radius: 6px; padding: 2px 8px; width: fit-content; }
   .oquefaz { font-size: 13px; color: #404040; }
   .note { font-size: 12px; color: #B15600; font-style: italic; }
   .meta-row { display: flex; flex-direction: column; gap: 6px; margin-top: 4px; padding-top: 8px; border-top: 1px dashed #E5E5E5; }
@@ -79,21 +80,22 @@
   </header>
 
   <div class="stats">
-    <div class="stat total"><div class="num">49</div><div class="lbl">automações mapeadas</div></div>
+    <div class="stat total"><div class="num">58</div><div class="lbl">automações mapeadas</div></div>
     <div class="stat"><div class="num">3</div><div class="lbl">precisam adaptar</div></div>
-    <div class="stat"><div class="num">24</div><div class="lbl">mantêm como está</div></div>
-    <div class="stat"><div class="num">13</div><div class="lbl">a confirmar</div></div>
-    <div class="stat"><div class="num">9</div><div class="lbl">não se aplicam</div></div>
+    <div class="stat"><div class="num">27</div><div class="lbl">mantêm como está</div></div>
+    <div class="stat"><div class="num">14</div><div class="lbl">a confirmar</div></div>
+    <div class="stat"><div class="num">14</div><div class="lbl">não se aplicam</div></div>
   </div>
 
   <div class="filters">
-    <button class="filter-btn active" data-filter="all" onclick="setFilter('all', this)">Todas (49)</button>
+    <button class="filter-btn active" data-filter="all" onclick="setFilter('all', this)">Todas (58)</button>
     <button class="filter-btn" data-filter="adaptar" onclick="setFilter('adaptar', this)">Precisam adaptar (3)</button>
-    <button class="filter-btn" data-filter="confirmar" onclick="setFilter('confirmar', this)">A confirmar (13)</button>
-    <button class="filter-btn" data-filter="replicar" onclick="setFilter('replicar', this)">Mantêm como está (24)</button>
-    <button class="filter-btn" data-filter="naoaplica" onclick="setFilter('naoaplica', this)">Não se aplicam (9)</button>
+    <button class="filter-btn" data-filter="confirmar" onclick="setFilter('confirmar', this)">A confirmar (14)</button>
+    <button class="filter-btn" data-filter="replicar" onclick="setFilter('replicar', this)">Mantêm como está (27)</button>
+    <button class="filter-btn" data-filter="naoaplica" onclick="setFilter('naoaplica', this)">Não se aplicam (14)</button>
   </div>
   <p class="legend">As caixas em laranja marcadas "Rascunho, validar" são ideias minhas de ajuste de gatilho, ainda não decididas, servem só de ponto de partida para a discussão.</p>
+  <p class="legend">Fluxos marcados com "n8n, fora do EDA" rodam em n8n, não no painel EDA, e entram aqui porque também tocam o Ploomes.</p>
   <p class="legend">Origem: o sistema onde a automação se origina, o nó que lê o gatilho e dispara o resto do fluxo, não é necessariamente o sistema "principal" (coluna que já se chamava "Orquestrador"). Caminho de sistemas: a ordem sequencial real em que cada sistema é tocado pelo fluxo.</p>
 
   
@@ -192,9 +194,23 @@
     <section class="section" data-section="confirmar">
       <div class="section-head">
         <h2>A confirmar</h2>
-        <span class="section-count" style="color:#867400;background:#FFFBE0">13</span>
+        <span class="section-count" style="color:#867400;background:#FFFBE0">14</span>
       </div>
       <div class="cards-grid">
+    <div class="card" data-cat="confirmar">
+      <div class="card-top">
+        <h3>Gerador de Contratos - Ploomes</h3>
+        <span class="badge" style="color:#867400;background:#FFFBE0;border:1px solid #EFE7A8">A confirmar</span>
+      </div>
+      <span class="flag-n8n">n8n, fora do EDA</span>
+      <p class="oquefaz">Busca cards na fase 'Gerar contrato' do Ploomes, gera o kit de 4 documentos (Contrato, Petição, Confissão de Dívida, Procuração) via um servidor próprio que chama a Claude, envia por e-mail e anexa ao card.</p>
+      <p class="note">Automação em n8n, fora do EDA. Distinta do 'cadastro do kit de contratos' do EDA. Confirmar se o status de contrato gerado aqui deve aparecer no wizard.</p>
+      <div class="meta-row">
+        <div class="meta-item"><span class="meta-label">Gatilho hoje</span><span class="meta-value">n8n, cron a cada 5 minutos.</span></div>
+        <div class="meta-item"><span class="meta-label">Caminho de sistemas</span><span class="meta-value">Ploomes → servidor próprio (Claude) → e-mail / Ploomes</span></div>
+        <div class="meta-item"><span class="meta-label">Status no wizard V2</span><span class="meta-value">Preparando contrato (a confirmar)</span></div>
+      </div>
+    </div>
     <div class="card" data-cat="confirmar">
       <div class="card-top">
         <h3>Sinalizar Empréstimo OAB</h3>
@@ -282,7 +298,7 @@
       <div class="meta-row">
         <div class="meta-item">
           <span class="meta-label">Gatilho hoje</span>
-          <span class="meta-value">Movimentação "fit" identificada para usuários do Programa de Benefícios (provável rotina periódica). A confirmar.</span>
+          <span class="meta-value">Cronjob diário: busca as movimentações fit dos usuários do Programa de Benefícios do dia anterior (confirmado por diagrama).</span>
         </div>
         <div class="meta-item">
           <span class="meta-label">Caminho de sistemas</span>
@@ -347,7 +363,7 @@
       <div class="meta-row">
         <div class="meta-item">
           <span class="meta-label">Gatilho hoje</span>
-          <span class="meta-value">A confirmar (não coberto pelo rascunho do Cláudio)</span>
+          <span class="meta-value">A confirmar (não coberto pelo rascunho de apoio)</span>
         </div>
         <div class="meta-item">
           <span class="meta-label">Caminho de sistemas</span>
@@ -370,7 +386,7 @@
       <div class="meta-row">
         <div class="meta-item">
           <span class="meta-label">Gatilho hoje</span>
-          <span class="meta-value">A confirmar (não coberto pelo rascunho do Cláudio)</span>
+          <span class="meta-value">A confirmar (não coberto pelo rascunho de apoio)</span>
         </div>
         <div class="meta-item">
           <span class="meta-label">Status no wizard V2</span>
@@ -389,7 +405,7 @@
       <div class="meta-row">
         <div class="meta-item">
           <span class="meta-label">Gatilho hoje</span>
-          <span class="meta-value">A confirmar (não coberto pelo rascunho do Cláudio)</span>
+          <span class="meta-value">A confirmar (não coberto pelo rascunho de apoio)</span>
         </div>
         <div class="meta-item">
           <span class="meta-label">Status no wizard V2</span>
@@ -408,7 +424,7 @@
       <div class="meta-row">
         <div class="meta-item">
           <span class="meta-label">Gatilho hoje</span>
-          <span class="meta-value">A confirmar (não coberto pelo rascunho do Cláudio)</span>
+          <span class="meta-value">A confirmar (não coberto pelo rascunho de apoio)</span>
         </div>
         <div class="meta-item">
           <span class="meta-label">Status no wizard V2</span>
@@ -427,7 +443,7 @@
       <div class="meta-row">
         <div class="meta-item">
           <span class="meta-label">Gatilho hoje</span>
-          <span class="meta-value">A confirmar (não coberto pelo rascunho do Cláudio)</span>
+          <span class="meta-value">A confirmar (não coberto pelo rascunho de apoio)</span>
         </div>
         <div class="meta-item">
           <span class="meta-label">Status no wizard V2</span>
@@ -446,7 +462,7 @@
       <div class="meta-row">
         <div class="meta-item">
           <span class="meta-label">Gatilho hoje</span>
-          <span class="meta-value">A confirmar (não coberto pelo rascunho do Cláudio)</span>
+          <span class="meta-value">A confirmar (não coberto pelo rascunho de apoio)</span>
         </div>
         <div class="meta-item">
           <span class="meta-label">Status no wizard V2</span>
@@ -465,7 +481,7 @@
       <div class="meta-row">
         <div class="meta-item">
           <span class="meta-label">Gatilho hoje</span>
-          <span class="meta-value">A confirmar (não coberto pelo rascunho do Cláudio)</span>
+          <span class="meta-value">A confirmar (não coberto pelo rascunho de apoio)</span>
         </div>
         <div class="meta-item">
           <span class="meta-label">Status no wizard V2</span>
@@ -478,9 +494,45 @@
     <section class="section" data-section="replicar">
       <div class="section-head">
         <h2>Mantêm como está</h2>
-        <span class="section-count" style="color:#008633;background:#EAFBEF">24</span>
+        <span class="section-count" style="color:#008633;background:#EAFBEF">27</span>
       </div>
       <div class="cards-grid">
+    <div class="card" data-cat="replicar">
+      <div class="card-top">
+        <h3>Fluxo sincronização cadastro Ploomes (card comercial) → SIJ (prospect) → V2</h3>
+        <span class="badge" style="color:#008633;background:#EAFBEF;border:1px solid #B6E8C4">Mantém como está</span>
+      </div>
+      <p class="oquefaz">Versão v2 do fluxo de cadastro. Busca cliente no Ploomes, roda Timer, busca cliente e cria o prospect no SIJ v2, e atualiza o card no Ploomes.</p>
+      <div class="meta-row">
+        <div class="meta-item"><span class="meta-label">Gatilho hoje</span><span class="meta-value">Card do Funil Comercial criado no Ploomes.</span></div>
+        <div class="meta-item"><span class="meta-label">Caminho de sistemas</span><span class="meta-value">Ploomes → SIJ v2 → Ploomes</span></div>
+        <div class="meta-item"><span class="meta-label">Status no wizard V2</span><span class="meta-value">Processo recebido</span></div>
+      </div>
+    </div>
+    <div class="card" data-cat="replicar">
+      <div class="card-top">
+        <h3>Fluxo sincronização atualização Ploomes (card comercial) → SIJ (prospect) → V2</h3>
+        <span class="badge" style="color:#008633;background:#EAFBEF;border:1px solid #B6E8C4">Mantém como está</span>
+      </div>
+      <p class="oquefaz">Versão v2 do fluxo de atualização. Busca prospect e cliente no SIJ v2 pelo id do card do Ploomes e atualiza o prospect no SIJ v2.</p>
+      <div class="meta-row">
+        <div class="meta-item"><span class="meta-label">Gatilho hoje</span><span class="meta-value">Card do Funil Comercial atualizado no Ploomes.</span></div>
+        <div class="meta-item"><span class="meta-label">Caminho de sistemas</span><span class="meta-value">Ploomes → SIJ v2</span></div>
+        <div class="meta-item"><span class="meta-label">Status no wizard V2</span><span class="meta-value">Processo recebido</span></div>
+      </div>
+    </div>
+    <div class="card" data-cat="replicar">
+      <div class="card-top">
+        <h3>Fluxo de Habilitação Loy → V2</h3>
+        <span class="badge" style="color:#008633;background:#EAFBEF;border:1px solid #B6E8C4">Mantém como está</span>
+      </div>
+      <p class="oquefaz">Versão v2 da habilitação Loy. Localiza o processo no Loy, identifica o sistema (Pré/Doro/Loft), cria documentos, faz peticionamento, baixa e atualiza o Negócio no SIJ v2 e atualiza o card no Ploomes.</p>
+      <div class="meta-row">
+        <div class="meta-item"><span class="meta-label">Gatilho hoje</span><span class="meta-value">Card entra na fase de habilitar no processo.</span></div>
+        <div class="meta-item"><span class="meta-label">Caminho de sistemas</span><span class="meta-value">Ploomes → Loy → SIJ v2 → Ploomes</span></div>
+        <div class="meta-item"><span class="meta-label">Status no wizard V2</span><span class="meta-value">Aguardando protocolo / Em conferência</span></div>
+      </div>
+    </div>
     <div class="card" data-cat="replicar">
       <div class="card-top">
         <h3>Fluxo para Enfileirar Lead Score</h3>
@@ -1041,7 +1093,7 @@
       <div class="meta-row">
         <div class="meta-item">
           <span class="meta-label">Gatilho hoje</span>
-          <span class="meta-value">A confirmar (não coberto pelo rascunho do Cláudio)</span>
+          <span class="meta-value">A confirmar (não coberto pelo rascunho de apoio)</span>
         </div>
         <div class="meta-item">
           <span class="meta-label">Caminho de sistemas</span>
@@ -1058,9 +1110,77 @@
     <section class="section" data-section="naoaplica">
       <div class="section-head">
         <h2>Não se aplicam ao Which</h2>
-        <span class="section-count" style="color:#6D6D6E;background:#F5F5F5">9</span>
+        <span class="section-count" style="color:#6D6D6E;background:#F5F5F5">14</span>
       </div>
       <div class="cards-grid">
+    <div class="card" data-cat="naoaplica">
+      <div class="card-top">
+        <h3>Fluxo Form Site → V2</h3>
+        <span class="badge" style="color:#6D6D6E;background:#F5F5F5;border:1px solid #E0E0E0">Não se aplica ao Which</span>
+      </div>
+      <p class="oquefaz">Versão v2 do form do site. Busca cliente no SIJ v2, verifica e cria/atualiza cliente e card no Ploomes.</p>
+      <p class="note">Confirmado por UX: os formulários não serão ponto de entrada no Wizard V2. Esta v2 unifica os 5 fluxos de formulário (Site, Zappier, Calculadora, Peritos, Antecipação).</p>
+      <div class="meta-row">
+        <div class="meta-item"><span class="meta-label">Gatilho hoje</span><span class="meta-value">origem_forms = form_site.</span></div>
+        <div class="meta-item"><span class="meta-label">Caminho de sistemas</span><span class="meta-value">Formulário → SIJ v2 → Ploomes</span></div>
+        <div class="meta-item"><span class="meta-label">Status no wizard V2</span><span class="meta-value">Não se aplica</span></div>
+      </div>
+    </div>
+    <div class="card" data-cat="naoaplica">
+      <div class="card-top">
+        <h3>Fluxo Form Programa de Benefícios → V2</h3>
+        <span class="badge" style="color:#6D6D6E;background:#F5F5F5;border:1px solid #E0E0E0">Não se aplica ao Which</span>
+      </div>
+      <p class="oquefaz">Versão v2 do form de Programa de Benefícios. Busca cliente no SIJ v2, cria cliente e card no Ploomes, cadastra o processo no Programa de Benefícios e cria anexos.</p>
+      <p class="note">Confirmado por UX: não vai existir esse ponto de entrada (formulário) no Wizard V2.</p>
+      <div class="meta-row">
+        <div class="meta-item"><span class="meta-label">Gatilho hoje</span><span class="meta-value">origem_forms = form_programa_de_beneficios.</span></div>
+        <div class="meta-item"><span class="meta-label">Caminho de sistemas</span><span class="meta-value">Formulário → SIJ v2 → Ploomes → Programa de Benefícios</span></div>
+        <div class="meta-item"><span class="meta-label">Status no wizard V2</span><span class="meta-value">Não se aplica</span></div>
+      </div>
+    </div>
+    <div class="card" data-cat="naoaplica">
+      <div class="card-top">
+        <h3>Relatório diário: falhas de cadastro (Gerador de Contratos)</h3>
+        <span class="badge" style="color:#6D6D6E;background:#F5F5F5;border:1px solid #E0E0E0">Não se aplica ao Which</span>
+      </div>
+      <span class="flag-n8n">n8n, fora do EDA</span>
+      <p class="oquefaz">Lê no Ploomes as tasks 'Corrigir cadastro' das últimas 24h e envia e-mail com a tabela para o comercial e análises.</p>
+      <p class="note">Automação em n8n, fora do EDA. Relatório interno por e-mail, sem nada visível pro cliente no Which.</p>
+      <div class="meta-row">
+        <div class="meta-item"><span class="meta-label">Gatilho hoje</span><span class="meta-value">n8n, cron diário 8h.</span></div>
+        <div class="meta-item"><span class="meta-label">Caminho de sistemas</span><span class="meta-value">Ploomes (leitura) → e-mail</span></div>
+        <div class="meta-item"><span class="meta-label">Status no wizard V2</span><span class="meta-value">Não se aplica</span></div>
+      </div>
+    </div>
+    <div class="card" data-cat="naoaplica">
+      <div class="card-top">
+        <h3>Conversão - Página Elevia</h3>
+        <span class="badge" style="color:#6D6D6E;background:#F5F5F5;border:1px solid #E0E0E0">Não se aplica ao Which</span>
+      </div>
+      <span class="flag-n8n">n8n, fora do EDA</span>
+      <p class="oquefaz">Recebe a conversão da landing da parceria Elevia e cria contato e deal no funil comercial já em 'Enviou Processo'.</p>
+      <p class="note">Automação em n8n, fora do EDA. Ponto de entrada de marketing, não é etapa da jornada mostrada no wizard.</p>
+      <div class="meta-row">
+        <div class="meta-item"><span class="meta-label">Gatilho hoje</span><span class="meta-value">n8n, webhook do RD Station.</span></div>
+        <div class="meta-item"><span class="meta-label">Caminho de sistemas</span><span class="meta-value">RD Station → Ploomes</span></div>
+        <div class="meta-item"><span class="meta-label">Status no wizard V2</span><span class="meta-value">Não se aplica (ponto de entrada)</span></div>
+      </div>
+    </div>
+    <div class="card" data-cat="naoaplica">
+      <div class="card-top">
+        <h3>Conversão - Página de Contato</h3>
+        <span class="badge" style="color:#6D6D6E;background:#F5F5F5;border:1px solid #E0E0E0">Não se aplica ao Which</span>
+      </div>
+      <span class="flag-n8n">n8n, fora do EDA</span>
+      <p class="oquefaz">Verifica/cria contato no Ploomes, cria deal no funil comercial (Leads) e grava a mensagem do formulário como interação.</p>
+      <p class="note">Automação em n8n, fora do EDA. Ponto de entrada de marketing, não é etapa da jornada mostrada no wizard.</p>
+      <div class="meta-row">
+        <div class="meta-item"><span class="meta-label">Gatilho hoje</span><span class="meta-value">n8n, webhook do RD Station.</span></div>
+        <div class="meta-item"><span class="meta-label">Caminho de sistemas</span><span class="meta-value">RD Station → Ploomes</span></div>
+        <div class="meta-item"><span class="meta-label">Status no wizard V2</span><span class="meta-value">Não se aplica (ponto de entrada)</span></div>
+      </div>
+    </div>
     <div class="card" data-cat="naoaplica">
       <div class="card-top">
         <h3>Fluxo Atualização da Análise Humana</h3>
