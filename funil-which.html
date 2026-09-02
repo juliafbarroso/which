@@ -333,7 +333,7 @@
       <span class="scenario-label">Cenário:</span>
       <button class="scenario-btn active" id="btn-manual" onclick="showScenario('manual')">Manual (hoje)</button>
       <button class="scenario-btn" id="btn-auto" onclick="showScenario('auto')">Automático (se as 3 pendências forem automatizadas)</button>
-      <span class="scenario-note" id="scenario-note">17 etapas, com Montar proposta, Solicitar documentos, Protocolo do cliente e Ajuste no protocolo como etapas próprias</span>
+      <span class="scenario-note" id="scenario-note">20 colunas, com Montar proposta, Solicitar documentos e Protocolo do cliente como etapas internas pendentes de automação, mais Enviar Negativa (automação já existe hoje) e Ajuste no protocolo como condicional</span>
     </div>
 
 
@@ -364,6 +364,7 @@
         <div class="column">
           <div class="col-head o-analise">
             <div class="title">Em análise</div>
+            <div class="client-view">Cliente vê: Em análise</div>
             <div class="trigger">Automático, ao preencher o número do processo</div>
             <div class="count">3 negócios</div>
             <span class="origin-tag">Análise</span>
@@ -399,9 +400,10 @@
         <div class="column pending">
           <div class="col-head o-comercial">
             <div class="title">Montar proposta</div>
+            <div class="client-view">Cliente não vê, é interno</div>
             <div class="trigger">Análise aprova o processo; hoje sem aviso automático, o Closer monta a proposta manualmente</div>
             <span class="pending-flag">Pendente de automação</span>
-            <div class="count">2 negócios · interna, cliente não vê</div>
+            <div class="count">2 negócios</div>
             <span class="stage-status-new">Novo, criar no Ploomes</span>
           </div>
           <div class="cards">
@@ -434,9 +436,10 @@
         <div class="column pending">
           <div class="col-head o-formalizacao">
             <div class="title">Solicitar documentos</div>
+            <div class="client-view">Cliente não vê, é interno</div>
             <div class="trigger">Formalização identifica documento faltante antes do contrato; hoje sem stage próprio</div>
             <span class="pending-flag">Pendente de automação</span>
-            <div class="count">1 negócio · interna, cliente não vê</div>
+            <div class="count">1 negócio</div>
             <span class="origin-tag">Formalização</span>
             <span class="stage-status-new">Novo, criar no Ploomes</span>
           </div>
@@ -473,6 +476,7 @@
         <div class="column">
           <div class="col-head o-formalizacao">
             <div class="title">Preparando contrato</div>
+            <div class="client-view">Cliente vê: Preparando contrato</div>
             <div class="trigger">Automático, ao aprovar a proposta (Proposta Aprovada)</div>
             <div class="count">2 negócios</div>
             <span class="origin-tag">Formalização</span>
@@ -540,6 +544,7 @@
               <div class="row"><div class="tags"><span class="tag-dot" style="background:#4a6cf7"></span></div><span class="day-badge">0d</span></div>
               <div class="avatar"></div>
             </div>
+            <div class="empty-hint">no manual o cliente age em dois momentos distintos, primeiro envia o comprovante (Aguardando protocolo), depois aguarda a nossa conferência (Em conferência); diferente do automático, onde ele não faz nada e por isso vê só "Protocolando" o tempo todo</div>
           </div>
         </div>
 
@@ -616,6 +621,7 @@
         <div class="column">
           <div class="col-head o-formalizacao">
             <div class="title">Concluído</div>
+            <div class="client-view">Cliente vê: Concluído</div>
             <div class="trigger">Financeiro marca pagamento concluído</div>
             <div class="count">6 negócios</div>
             <span class="origin-tag">Formalização</span>
@@ -630,13 +636,14 @@
           </div>
         </div>
 
-        <div class="column">
+        <div class="column pending">
           <div class="col-head o-posganho">
             <div class="title">Pendências</div>
             <div class="client-view">Cliente não vê, é só para a operação</div>
-            <div class="trigger">Reúne pendências pós-Ganho de motivos variados. Deságio flexível e devolução de IR já têm regra pronta no SIJ, falta só sincronizar com o Ploomes (mesmo padrão já usado em outros pontos). Modelo 50% ainda depende de alinhamento maior sobre uma fonte de dado pra automatizar a homologação</div>
+            <div class="trigger">Mecanismo de entrada ainda em aberto (reunião 02/09): 1) automático, sincronização SIJ → Ploomes, como desenhado aqui; 2) reativo, cliente aciona pelo chat ou pela interface e isso cria o card aqui, mantém rastreio sem automação completa; 3) como é hoje, tudo por e-mail, sem rastreio na plataforma. Deságio flexível e devolução de IR já têm regra pronta no SIJ pra opção 1, modelo 50% ainda depende de alinhamento maior sobre uma fonte de dado pra automatizar a homologação</div>
             <div class="count">3 negócios · só pós-Ganho</div>
             <span class="origin-tag">SIJ → Ploomes</span>
+            <span class="pending-flag">Mecanismo em aberto</span>
             <span class="stage-status-new">Novo, criar no Ploomes</span>
           </div>
           <div class="cards">
@@ -655,7 +662,26 @@
               <div class="sub">Paulo Ricardo</div>
               <div class="row"><span class="pill-tag">Devolução de IR</span></div>
             </div>
-            <div class="empty-hint">deságio flexível e IR entram por sincronização SIJ → Ploomes (status "Devolver" ou "Cliente deve IR"), automático assim que construído; modelo 50% ainda é manual até definir a fonte de dado da homologação</div>
+            <div class="empty-hint">na opção automática, entra vindo de Ganhos por sincronização SIJ → Ploomes (status "Devolver" ou "Cliente deve IR"); nas opções reativa ou "como hoje", o card nasceria de um pedido do cliente ou nem existiria aqui, ver nota acima</div>
+          </div>
+        </div>
+
+        <div class="column">
+          <div class="col-head o-final">
+            <div class="title">Enviar Negativa</div>
+            <div class="client-view">Cliente não vê, é interno</div>
+            <div class="trigger">Automático via n8n, já roda hoje; falha ocasional por campo faltante ou divergente, corrigido manualmente e reentra no fluxo normal</div>
+            <div class="count">1 negócio</div>
+            <span class="origin-tag">Análise / Comercial</span>
+            <span class="stage-status-new">Novo, criar no Ploomes</span>
+          </div>
+          <div class="cards">
+            <div class="card">
+              <div class="name">Fábio Teixeira - 0009012...</div>
+              <div class="sub">Fábio Teixeira</div>
+              <div class="row"><div class="tags"><span class="tag-dot" style="background:#9a97a8"></span></div><span class="day-badge">0d</span></div>
+              <div class="avatar"></div>
+            </div>
           </div>
         </div>
 
@@ -680,6 +706,7 @@
         <div class="column">
           <div class="col-head o-final">
             <div class="title">Negociação encerrada</div>
+            <div class="client-view">Cliente vê: Negociação encerrada</div>
             <div class="trigger">Comercial marca Perdidos e registra o motivo</div>
             <div class="count">2 negócios</div>
           </div>
@@ -719,6 +746,7 @@
         <div class="column">
           <div class="col-head o-analise">
             <div class="title">Em análise</div>
+            <div class="client-view">Cliente vê: Em análise</div>
             <div class="trigger">Automático, ao preencher o número do processo</div>
             <div class="count">3 negócios</div>
             <span class="origin-tag">Análise</span>
@@ -753,9 +781,27 @@
 
         <div class="column">
           <div class="col-head o-comercial">
+            <div class="title">Montar proposta</div>
+            <div class="client-view">Cliente não vê, é interno</div>
+            <div class="trigger">Automático, monta a proposta assim que a análise aprova o processo</div>
+            <div class="count">2 negócios</div>
+            <span class="stage-status-new">Novo, criar no Ploomes</span>
+          </div>
+          <div class="cards">
+            <div class="card">
+              <div class="name">Ricardo Nunes - 0004521...</div>
+              <div class="sub">Ricardo Nunes</div>
+              <div class="row"><div class="tags"><span class="tag-dot" style="background:#3fae6a"></span></div><span class="day-badge">0d</span></div>
+              <div class="avatar"></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="column">
+          <div class="col-head o-comercial">
             <div class="title">Proposta enviada</div>
             <div class="client-view">Cliente vê: Proposta disponível</div>
-            <div class="trigger">Proposta montada automaticamente pela análise aprovada, sem passar por Montar proposta</div>
+            <div class="trigger">Automático, PDF gerado e enviado assim que "Montar proposta" termina</div>
             <div class="count">4 negócios</div>
           </div>
           <div class="cards">
@@ -765,7 +811,6 @@
               <div class="row"><div class="tags"><span class="tag-dot" style="background:#3fae6a"></span><span class="tag-dot" style="background:#4a6cf7"></span></div><span class="day-badge">0d</span></div>
               <div class="avatar"></div>
             </div>
-            <div class="empty-hint">proposta montada automaticamente, sem passar por "Montar proposta"</div>
           </div>
         </div>
 
@@ -792,6 +837,7 @@
         <div class="column">
           <div class="col-head o-formalizacao">
             <div class="title">Preparando contrato</div>
+            <div class="client-view">Cliente vê: Preparando contrato</div>
             <div class="trigger">Automático, ao aprovar a proposta (Proposta Aprovada)</div>
             <div class="count">2 negócios</div>
             <span class="origin-tag">Formalização</span>
@@ -848,7 +894,7 @@
         <div class="column">
           <div class="col-head o-formalizacao">
             <div class="title">Verificar protocolo</div>
-            <div class="client-view">Cliente vê: Em conferência</div>
+            <div class="client-view">Cliente vê: Protocolando</div>
             <div class="trigger">Checagem humana do que o robô protocolou</div>
             <div class="count">1 negócio</div>
             <span class="origin-tag">Formalização</span>
@@ -860,7 +906,7 @@
               <div class="row"><div class="tags"><span class="tag-dot" style="background:#4a6cf7"></span></div><span class="day-badge">0d</span></div>
               <div class="avatar"></div>
             </div>
-            <div class="empty-hint">checagem humana do que o robô protocolou, sem o "Ajuste no protocolo" (esse erro é do cliente, não deveria acontecer com o robô)</div>
+            <div class="empty-hint">checagem humana do que o robô protocolou, sem o "Ajuste no protocolo" (esse erro é do cliente, não deveria acontecer com o robô). Cliente não vê uma etapa própria pra conferência, a conferência é nossa, ele continua vendo "Protocolando" até o card avançar</div>
           </div>
         </div>
 
@@ -923,6 +969,7 @@
         <div class="column">
           <div class="col-head o-formalizacao">
             <div class="title">Concluído</div>
+            <div class="client-view">Cliente vê: Concluído</div>
             <div class="trigger">Financeiro marca pagamento concluído</div>
             <div class="count">6 negócios</div>
             <span class="origin-tag">Formalização</span>
@@ -937,13 +984,14 @@
           </div>
         </div>
 
-        <div class="column">
+        <div class="column pending">
           <div class="col-head o-posganho">
             <div class="title">Pendências</div>
             <div class="client-view">Cliente não vê, é só para a operação</div>
-            <div class="trigger">Reúne pendências pós-Ganho de motivos variados. Deságio flexível e devolução de IR já têm regra pronta no SIJ, falta só sincronizar com o Ploomes (mesmo padrão já usado em outros pontos). Modelo 50% ainda depende de alinhamento maior sobre uma fonte de dado pra automatizar a homologação</div>
+            <div class="trigger">Mecanismo de entrada ainda em aberto (reunião 02/09): 1) automático, sincronização SIJ → Ploomes, como desenhado aqui; 2) reativo, cliente aciona pelo chat ou pela interface e isso cria o card aqui, mantém rastreio sem automação completa; 3) como é hoje, tudo por e-mail, sem rastreio na plataforma. Deságio flexível e devolução de IR já têm regra pronta no SIJ pra opção 1, modelo 50% ainda depende de alinhamento maior sobre uma fonte de dado pra automatizar a homologação</div>
             <div class="count">3 negócios · só pós-Ganho</div>
             <span class="origin-tag">SIJ → Ploomes</span>
+            <span class="pending-flag">Mecanismo em aberto</span>
             <span class="stage-status-new">Novo, criar no Ploomes</span>
           </div>
           <div class="cards">
@@ -962,7 +1010,26 @@
               <div class="sub">Paulo Ricardo</div>
               <div class="row"><span class="pill-tag">Devolução de IR</span></div>
             </div>
-            <div class="empty-hint">deságio flexível e IR entram por sincronização SIJ → Ploomes (status "Devolver" ou "Cliente deve IR"), automático assim que construído; modelo 50% ainda é manual até definir a fonte de dado da homologação</div>
+            <div class="empty-hint">na opção automática, entra vindo de Ganhos por sincronização SIJ → Ploomes (status "Devolver" ou "Cliente deve IR"); nas opções reativa ou "como hoje", o card nasceria de um pedido do cliente ou nem existiria aqui, ver nota acima</div>
+          </div>
+        </div>
+
+        <div class="column">
+          <div class="col-head o-final">
+            <div class="title">Enviar Negativa</div>
+            <div class="client-view">Cliente não vê, é interno</div>
+            <div class="trigger">Automático, n8n envia a negativa assim que reativarmos o agendamento</div>
+            <div class="count">1 negócio</div>
+            <span class="origin-tag">Análise / Comercial (robô)</span>
+            <span class="stage-status-new">Novo, criar no Ploomes</span>
+          </div>
+          <div class="cards">
+            <div class="card">
+              <div class="name">Fábio Teixeira - 0009012...</div>
+              <div class="sub">Fábio Teixeira</div>
+              <div class="row"><div class="tags"><span class="tag-dot" style="background:#9a97a8"></span></div><span class="day-badge">0d</span></div>
+              <div class="avatar"></div>
+            </div>
           </div>
         </div>
 
@@ -987,6 +1054,7 @@
         <div class="column">
           <div class="col-head o-final">
             <div class="title">Negociação encerrada</div>
+            <div class="client-view">Cliente vê: Negociação encerrada</div>
             <div class="trigger">Comercial marca Perdidos e registra o motivo</div>
             <div class="count">2 negócios</div>
           </div>
@@ -1012,8 +1080,8 @@
     document.getElementById('btn-manual').classList.toggle('active', which === 'manual');
     document.getElementById('btn-auto').classList.toggle('active', which === 'auto');
     document.getElementById('scenario-note').textContent = which === 'manual'
-      ? '17 etapas, com Montar proposta, Solicitar documentos, Protocolo do cliente e Ajuste no protocolo como etapas próprias'
-      : '14 etapas, Montar proposta e Solicitar documentos somem, Protocolo do cliente vira Protocolando (robô) e Ajuste no protocolo some junto';
+      ? '20 colunas, com Montar proposta, Solicitar documentos e Protocolo do cliente como etapas internas pendentes de automação, mais Enviar Negativa (automação já existe hoje) e Ajuste no protocolo como condicional'
+      : '18 colunas, Montar proposta continua como etapa própria mas automática, Enviar Negativa segue automática como já é hoje, Solicitar documentos some (a plataforma já pede sozinha), Protocolo do cliente vira Protocolando (robô) e Ajuste no protocolo some junto';
   }
 </script>
 
