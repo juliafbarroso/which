@@ -1,0 +1,806 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Protótipo: módulo Propostas no SIJ</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --p50:#AAFFBE;--p400:#2CBD62;--p500:#009C46;--p600:#008633;--p700:#007122;--p800:#005C12;
+  --s500:#136CE2;--s600:#105ABC;
+  --n50:#FAFAFA;--n100:#F5F5F5;--n200:#E5E5E5;--n300:#D4D4D4;--n400:#A3A3A3;--n500:#6D6D6E;--n600:#525252;--n700:#404040;--n800:#262626;--n900:#171717;
+  --red50:#FEF2EC;--red500:#D2190B;--red900:#9D231C;
+  --grn50:#C9FFD6;--grn500:#1E7E34;--grn900:#065F1B;
+  --yel50:#FFFBE0;--yel500:#867400;--yel900:#675413;
+  --blu50:#ECF5FE;--blu500:#207AC3;--blu900:#1D4F79;
+  --org50:#FFE9D2;--org500:#B15600;--org900:#8B4400;
+  --text-dark:#262626;--text-soft:#6D6D6E;--text-light:#FAFAFA;--text-disabled:#A3A3A3;
+  --bg-white:#FAFAFA;--bg-grey:#F5F5F5;--border:#D4D4D4;
+  --r-md:8px;--r-xl:12px;
+}
+*{box-sizing:border-box}
+html,body{margin:0;height:100%}
+body{font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,sans-serif;font-size:13px;line-height:1.2;color:var(--text-dark);background:var(--bg-grey)}
+button{font-family:inherit}
+.app{display:flex;min-height:100vh}
+.sidebar{width:216px;flex:none;background:var(--n900);color:var(--text-light);padding:16px 12px;display:flex;flex-direction:column;gap:4px}
+.brand{font-weight:700;font-size:16px;padding:8px 12px 16px;display:flex;align-items:center;gap:8px}
+.brand i{display:inline-block;width:22px;height:22px;border-radius:6px;background:var(--p500)}
+.nav-item{padding:10px 12px;border-radius:var(--r-md);color:var(--n300);font-size:13px;display:flex;align-items:center;justify-content:space-between}
+.nav-item.active{background:var(--p700);color:#fff;font-weight:600}
+.nav-item.muted{opacity:.55}
+.new-chip{background:var(--p50);color:var(--p800);font-size:10px;font-weight:700;border-radius:999px;padding:2px 6px}
+.main{flex:1;min-width:0;display:flex;flex-direction:column}
+.topbar{height:52px;background:var(--bg-white);border-bottom:1px solid var(--n200);display:flex;align-items:center;justify-content:space-between;padding:0 24px}
+.topbar .user{display:flex;align-items:center;gap:8px;color:var(--text-soft)}
+.avatar{width:28px;height:28px;border-radius:50%;background:var(--p600);color:#fff;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:600}
+.proto-banner{background:var(--yel50);color:var(--yel900);border-bottom:1px solid #eadf9a;padding:8px 24px;font-size:12px;display:flex;gap:8px;align-items:center;justify-content:space-between}
+.proto-banner button{border:1px solid var(--yel500);background:transparent;color:var(--yel900);border-radius:var(--r-md);padding:4px 10px;font-size:12px;cursor:pointer;font-weight:500}
+.content{padding:24px;max-width:1440px;width:100%}
+.breadcrumb{display:flex;gap:8px;align-items:center;color:var(--text-soft);font-size:12px;margin-bottom:12px}
+.breadcrumb a{color:var(--blu500);cursor:pointer;text-decoration:none}
+.page-header{display:flex;align-items:flex-start;justify-content:space-between;gap:16px;margin-bottom:16px}
+.page-header h1{font-size:25px;line-height:1.2;margin:0 0 4px;font-weight:700}
+.page-header p{margin:0;color:var(--text-soft);font-size:13px}
+.tabs{display:flex;gap:4px;border-bottom:1px solid var(--n300);margin-bottom:16px;overflow-x:auto}
+.tab{padding:10px 16px;cursor:pointer;color:var(--text-soft);font-weight:500;border-bottom:2px solid transparent;white-space:nowrap;background:none;border-top:0;border-left:0;border-right:0;font-size:13px}
+.tab.active{color:var(--p600);border-bottom-color:var(--p600);font-weight:600}
+.card{background:var(--bg-white);border:1px solid var(--n200);border-radius:var(--r-xl);padding:16px;box-shadow:0 1px 2px rgba(0,0,0,.04)}
+.card + .card{margin-top:16px}
+.grid .card + .card{margin-top:0}
+.create{display:grid;grid-template-columns:minmax(0,1fr) 360px;gap:16px;align-items:start}
+@media(max-width:1100px){.create{grid-template-columns:1fr}}
+.sticky{position:sticky;top:16px}
+.fgrid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px}
+@media(max-width:760px){.fgrid{grid-template-columns:1fr}}
+.radio{display:flex;align-items:center;gap:8px;padding:8px 0}
+.b-manual{background:var(--n800);color:#fff;font-size:10px;margin-left:6px;padding:2px 8px}
+.err-txt{color:var(--red500);font-size:12px}
+.card h3{margin:0 0 12px;font-size:16px;font-weight:600}
+.card h4{margin:0 0 8px;font-size:13px;font-weight:600;color:var(--text-soft);text-transform:none}
+.toolbar{display:flex;gap:12px;flex-wrap:wrap;align-items:flex-end;margin-bottom:16px}
+.field{display:flex;flex-direction:column;gap:4px;min-width:170px}
+.field label{font-size:12px;color:var(--text-soft);font-weight:500}
+.input,.select{height:36px;border:1px solid var(--border);border-radius:var(--r-md);padding:0 10px;background:#fff;font-family:inherit;font-size:13px;color:var(--text-dark)}
+.input:focus,.select:focus,textarea:focus{outline:3px solid var(--n300);border-color:var(--n500)}
+textarea.input{height:auto;padding:8px 10px;resize:vertical}
+.input.err{border-color:var(--red500)}
+.search-wrap{position:relative}
+.search-wrap svg{position:absolute;left:10px;top:28px;color:var(--n400)}
+.search-wrap .input{padding-left:32px;min-width:260px}
+.btn{height:36px;padding:0 16px;border-radius:var(--r-md);border:1px solid transparent;font-weight:600;font-size:13px;cursor:pointer;display:inline-flex;align-items:center;gap:6px;font-family:inherit}
+.btn.sm{height:30px;padding:0 12px;font-size:12px}
+.btn.primary{background:var(--p600);color:#fff}.btn.primary:hover{background:var(--p800)}
+.btn.outline{background:#fff;border-color:var(--border);color:var(--text-dark)}.btn.outline:hover{background:var(--n100)}
+.btn.ghost{background:transparent;color:var(--blu500)}
+.btn[disabled]{background:var(--n200);color:var(--text-disabled);border-color:var(--n200);cursor:not-allowed}
+.table-wrap{overflow-x:auto;border:1px solid var(--n200);border-radius:var(--r-xl);background:var(--bg-white)}
+table{border-collapse:collapse;width:100%;font-size:13px}
+th{background:var(--n100);text-align:left;font-weight:600;padding:12px;border-bottom:1px solid var(--n200);white-space:nowrap;color:var(--text-soft);font-size:12px}
+td{padding:12px;border-bottom:1px solid var(--n200);vertical-align:middle}
+tr:last-child td{border-bottom:0}
+tr.click{cursor:pointer}tr.click:hover td{background:var(--n100)}
+.num{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
+.sub{color:var(--text-soft);font-size:12px;margin-top:2px}
+.badge{display:inline-flex;align-items:center;gap:4px;border-radius:999px;padding:3px 10px;font-size:12px;font-weight:600;white-space:nowrap}
+.b-info{background:var(--blu50);color:var(--blu900)}
+.b-ok{background:var(--grn50);color:var(--grn900)}
+.b-warn{background:var(--org50);color:var(--org900)}
+.b-err{background:var(--red50);color:var(--red900)}
+.b-neutral{background:var(--n200);color:var(--n700)}
+.b-yel{background:var(--yel50);color:var(--yel900)}
+.pager{display:flex;justify-content:space-between;align-items:center;margin-top:12px;color:var(--text-soft);font-size:12px}
+.alert{display:flex;gap:10px;border-radius:var(--r-md);padding:12px;margin-bottom:12px;font-size:13px;align-items:flex-start;border:1px solid}
+.alert svg{flex:none;margin-top:1px}
+.alert strong{display:block;margin-bottom:2px}
+.al-err{background:var(--red50);border-color:#f3b9a6;color:var(--red900)}
+.al-warn{background:var(--org50);border-color:#f0c79a;color:var(--org900)}
+.al-info{background:var(--blu50);border-color:#b7d6f1;color:var(--blu900)}
+.grid{display:grid;gap:16px}
+.g2{grid-template-columns:repeat(2,minmax(0,1fr))}
+.g3{grid-template-columns:repeat(3,minmax(0,1fr))}
+.g4{grid-template-columns:repeat(4,minmax(0,1fr))}
+@media(max-width:1100px){.g3,.g4{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:760px){.g2,.g3,.g4{grid-template-columns:1fr}.sidebar{display:none}}
+.kv{display:flex;flex-direction:column;gap:2px}
+.kv .k{font-size:12px;color:var(--text-soft)}
+.kv .v{font-size:14px;font-weight:600}
+.kv .src{font-size:11px;color:var(--text-disabled);font-weight:400}
+.big{font-size:25px;font-weight:700}
+.line{display:flex;justify-content:space-between;gap:12px;padding:8px 0;border-bottom:1px dashed var(--n300)}
+.line:last-child{border-bottom:0}
+.line .l{color:var(--text-soft)}
+.line .r{font-weight:600;text-align:right}
+.line.total{border-top:1px solid var(--n300);border-bottom:0;margin-top:4px;padding-top:12px}
+.line.total .r{font-size:18px;color:var(--p700)}
+.tip{display:inline-flex;align-items:center;gap:4px;background:var(--yel50);color:var(--yel900);font-size:11px;font-weight:600;border-radius:999px;padding:2px 8px;cursor:help;margin-left:6px}
+.collapse-h{display:flex;justify-content:space-between;align-items:center;cursor:pointer;font-weight:600;font-size:14px}
+.collapse-b{margin-top:12px}
+.hidden{display:none}
+.lock{display:inline-flex;align-items:center;gap:4px;color:var(--text-soft);font-size:12px}
+.meta-row{display:flex;gap:16px;flex-wrap:wrap;color:var(--text-soft);font-size:12px;margin-top:6px}
+.overlay{position:fixed;inset:0;background:rgba(23,23,23,.25);display:flex;justify-content:flex-end;z-index:50}
+.overlay.center{justify-content:center;align-items:center}
+.drawer{width:480px;max-width:100%;background:var(--n50);height:100%;overflow:auto;padding:24px;border-top-left-radius:10px;border-bottom-left-radius:10px}
+.modal{width:560px;max-width:92%;background:var(--n50);border-radius:var(--r-xl);padding:24px;max-height:90vh;overflow:auto}
+.modal h3,.drawer h3{margin:0 0 4px;font-size:20px}
+.modal .lead,.drawer .lead{color:var(--text-soft);margin:0 0 16px}
+.modal-actions{display:flex;justify-content:flex-end;gap:8px;margin-top:16px}
+.diff{background:var(--n100);border-radius:var(--r-md);padding:10px 12px;margin-top:12px;font-size:12px}
+.diff div{padding:3px 0}
+.diff b{font-weight:600}
+.toast{position:fixed;top:16px;right:16px;background:#fff;border:1px solid var(--grn500);border-left:4px solid var(--grn500);border-radius:var(--r-md);padding:12px 16px;box-shadow:0 8px 24px rgba(0,0,0,.12);z-index:80;max-width:340px}
+.toast strong{display:block;margin-bottom:2px}
+.open-list{margin:0;padding-left:18px;display:flex;flex-direction:column;gap:10px;line-height:1.35}
+.open-list li span{display:block;color:var(--text-soft);font-size:12px;margin-top:2px}
+.pill-state{font-size:11px;font-weight:700;border-radius:999px;padding:2px 8px;margin-left:8px}
+.empty{text-align:center;padding:48px 16px;color:var(--text-soft)}
+.empty b{display:block;color:var(--text-dark);font-size:16px;margin-bottom:6px}
+.lotes td.small{font-size:12px}
+.progress{height:6px;background:var(--n200);border-radius:99px;overflow:hidden;margin-top:6px}
+.progress i{display:block;height:100%;background:var(--p500)}
+</style>
+</head>
+<body>
+<div class="app">
+  <aside class="sidebar">
+    <div class="brand"><i></i> SIJ</div>
+    <div class="nav-item muted">Clientes</div>
+    <div class="nav-item muted">Processos</div>
+    <div class="nav-item muted">Tribunais</div>
+    <div class="nav-item muted">Devedores</div>
+    <div class="nav-item muted">JusDash</div>
+    <div class="nav-item muted">Prospecção e Score</div>
+    <div class="nav-item active">Propostas <span class="new-chip">NOVO</span></div>
+  </aside>
+  <div class="main">
+    <header class="topbar">
+      <span style="color:var(--text-soft)">Módulo com acesso restrito (quem acessa: a definir com o Comercial)</span>
+      <span class="user"><span>Usuário de exemplo</span><span class="avatar">UE</span></span>
+    </header>
+    <div class="proto-banner">
+      <span><b>Protótipo para validação.</b> Todos os dados são simulados. Regras e valores marcados "a confirmar" dependem de definição do Comercial ou do Jurídico.</span>
+      <button data-action="open-points">Pontos em aberto</button>
+    </div>
+    <main class="content" id="root"></main>
+  </div>
+</div>
+<div id="layer"></div>
+
+<script>
+/* ---------- utilidades ---------- */
+const NOW = new Date('2026-10-13T15:00:00');
+const ICON = {
+  search:'<circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/>',
+  lock:'<rect width="18" height="11" x="3" y="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/>',
+  info:'<circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/>',
+  alert:'<path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3"/><path d="M12 9v4"/><path d="M12 17h.01"/>',
+  back:'<path d="m12 19-7-7 7-7"/><path d="M19 12H5"/>',
+  chev:'<path d="m6 9 6 6 6-6"/>',
+  edit:'<path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/>',
+  clock:'<circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/>'
+};
+const ic=(n,s=16)=>`<svg width="${s}" height="${s}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">${ICON[n]}</svg>`;
+const brl=v=>v.toLocaleString('pt-BR',{style:'currency',currency:'BRL'});
+const pct=v=>v.toLocaleString('pt-BR',{minimumFractionDigits:1,maximumFractionDigits:1})+'%';
+const dt=d=>d.toLocaleDateString('pt-BR')+' '+d.toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'});
+const addH=(d,h)=>new Date(d.getTime()+h*3600*1000);
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const CONFIRMAR='<span class="tip" title="A regra consta na transcrição da planilha de política interna, mas o PDF da Política não traz o percentual. Confirmar com o Comercial se está vigente e como é aplicada.">a confirmar</span>';
+
+/* ---------- dados simulados ---------- */
+const DOCS_PADRAO=['Assinatura digital ou reconhecimento de firma em cartório (pode ser feito via ZapSign)'];
+const propostas=[
+ {id:'PRP-0412',cliente:'Cliente Exemplo 01',processo:'0000101-00.2024.4.01.3400',devedor:'União (órgão público federal)',tipoDevedor:'Público',credito:'Condenação',modelo:'100%',origem:'Blip',criada:'2026-10-13T09:12',status:'calculada',liquido:41820.55,tribunal:'TRF1',uf:'DF',rito:'RPV',vara:'Vara federal (exemplo)',fase:'Fase 8 ou 8.1',valorFace:52400,prazoBase:12,ajReu:0,ajTrib:-1,ajVara:-1,alvo:30.0,minimo:27.0,penal:0,incDev:0,incCli:3.0,incPol:[],ir:1572.00,docs:DOCS_PADRAO,alertas:[]},
+ {id:'PRP-0411',cliente:'Cliente Exemplo 02',processo:'0000102-00.2023.8.19.0001',devedor:'Estado do Rio de Janeiro',tipoDevedor:'Público',credito:'Honorários sucumbenciais',modelo:'50%',origem:'Blip',criada:'2026-10-12T16:40',status:'enviada',liquido:18240.10,tribunal:'TJRJ',uf:'RJ',rito:'RPV',vara:'Vara de Fazenda Pública (exemplo)',fase:'Fase 7 ou 7.2',valorFace:24900,prazoBase:16,ajReu:1,ajTrib:0,ajVara:-1,alvo:33.0,minimo:30.0,penal:0,incDev:3.0,incCli:3.0,incPol:[{nome:'TJRJ, cessão pública e registro em cartório',valor:5.7,confirmar:true}],ir:0,docs:['Cessão pública e registro em cartório de títulos e documentos (apenas para devedor público)'],alertas:['Cessão pública','Tem incremento']},
+ {id:'PRP-0410',cliente:'Cliente Exemplo 03',processo:'0000103-00.2024.8.11.0041',devedor:'Município (exemplo)',tipoDevedor:'Público',credito:'Honorários dativos',modelo:'100%',origem:'Which',criada:'2026-10-11T11:05',status:'enviada',liquido:9310.75,tribunal:'TJMT',uf:'MT',rito:'RPV',vara:'Vara de Fazenda Pública (exemplo)',fase:'Fase 9',valorFace:12600,prazoBase:8,ajReu:0,ajTrib:0,ajVara:0,alvo:28.0,minimo:25.0,penal:0,incDev:0,incCli:3.0,incPol:[{nome:'TJMT, cessão por instrumento público',valor:3.0,confirmar:true},{nome:'Honorário dativo com revelia',valor:2.0,confirmar:false}],ir:0,docs:['Cessão por instrumento público, com pagamento após a confecção da cessão pública (devedor público estadual ou municipal)'],alertas:['Cessão pública','Tem incremento']},
+ {id:'PRP-0409',excecaoId:'EXC-001',cliente:'Cliente Exemplo 04',processo:'0000104-00.2022.4.03.6100',devedor:'União (órgão público federal)',tipoDevedor:'Público',credito:'Condenação',modelo:'100%',origem:'Blip',criada:'2026-10-08T10:30',status:'enviada',liquido:30210.00,tribunal:'TRF3',uf:'SP',rito:'RPV',vara:'Vara federal (exemplo)',fase:'Fase 9',valorFace:38000,prazoBase:8,ajReu:0,ajTrib:0,ajVara:0,alvo:27.0,minimo:24.0,penal:0,incDev:0,incCli:3.0,incPol:[],ir:1140.00,docs:DOCS_PADRAO,alertas:['Exceção de cliente']},
+ {id:'PRP-0408',cliente:'Cliente Exemplo 05',processo:'0000105-00.2021.8.26.0053',devedor:'Município (exemplo)',tipoDevedor:'Público',credito:'Condenação',modelo:'100%',origem:'Which',criada:'2026-10-13T08:50',status:'nao_elegivel',liquido:0,tribunal:'TJSP',uf:'SP',rito:'Precatório',vara:'Vara de Fazenda Pública (exemplo)',fase:'Fase 1',valorFace:76000,prazoBase:27,ajReu:6,ajTrib:5,ajVara:0,prazoFinalFixo:38,alvo:0,minimo:0,penal:0,incDev:0,incCli:0,incPol:[],ir:0,docs:[],alertas:[],motivo:'Prazo de liquidação de 38 meses, acima do limite de 36 meses da Política.'},
+ {id:'PRP-0407',cliente:'Cliente Exemplo 06',processo:'0000106-00.2024.4.05.8300',devedor:'União (órgão público federal)',tipoDevedor:'Público',credito:'Condenação',modelo:'100%',origem:'Blip',criada:'2026-10-13T08:15',status:'erro',liquido:0,tribunal:'TRF5',uf:'PE',rito:'RPV',vara:'Vara federal (exemplo)',fase:'Fase 8 ou 8.1',valorFace:19800,prazoBase:12,ajReu:0,ajTrib:0,ajVara:0,alvo:0,minimo:0,penal:0,incDev:0,incCli:0,incPol:[],ir:0,docs:[],alertas:[],erroMsg:'Não foi possível consultar o tempo da vara no CNJ. O comportamento diante de falha do CNJ ainda é um ponto em aberto (retentativa, uso do último valor salvo ou aviso para a Análise).'},
+ {id:'PRP-0406',cliente:'Cliente Exemplo 07 (lote)',processo:'3 processos',devedor:'Vários',tipoDevedor:'Público',credito:'Vários',modelo:'50% e 100%',origem:'Which',criada:'2026-10-12T18:20',status:'calculada',liquido:0,tribunal:'Vários',uf:'-',rito:'RPV',vara:'-',fase:'Vários',valorFace:0,prazoBase:0,ajReu:0,ajTrib:0,ajVara:0,alvo:0,minimo:0,penal:0,incDev:0,incCli:3.0,incPol:[],ir:0,docs:DOCS_PADRAO,alertas:['Exceção'],
+   lote:[
+     {proc:'0000107-00.2024.4.01.3400',credito:'Condenação',fase:'Fase 9',modelo:'100%',valor:34000,alvo:26.0,minimo:23.0,penal:0,incDev:0,liquido:24960.00},
+     {proc:'0000108-00.2023.4.01.3400',credito:'Honorários sucumbenciais',fase:'Fase 7 ou 7.2',modelo:'50%',valor:7200,alvo:31.0,minimo:28.0,penal:1.0,incDev:0,liquido:4560.00},
+     {proc:'0000109-00.2023.4.01.3400',credito:'Honorários contratuais',fase:'Fase 8 ou 8.1',modelo:'100%',valor:2600,alvo:29.0,minimo:26.0,penal:3.0,incDev:0,liquido:1710.00}
+   ]},
+ {id:'PRP-0405',cliente:'Cliente Exemplo 08',processo:'0000110-00.2024.4.01.3700',devedor:'União (órgão público federal)',tipoDevedor:'Público',credito:'Condenação e honorários',modelo:'Aguarda',origem:'Blip',criada:'2026-10-10T14:00',status:'enviada',liquido:22500.40,tribunal:'TRF1',uf:'MA',rito:'RPV',vara:'Vara federal (exemplo)',fase:'Fase 9',valorFace:29900,prazoBase:8,ajReu:0,ajTrib:0,ajVara:0,alvo:27.0,minimo:24.0,penal:0,incDev:0,incCli:3.0,incPol:[],ir:897.00,docs:DOCS_PADRAO,alertas:[]}
+];
+const TIPOS_EXC=[
+ {k:'Deságio fixo',u:'%',desc:'A proposta sai com este deságio, sem escolha da closer e fora da faixa mínimo e alvo.'},
+ {k:'Ajuste em pontos percentuais',u:'p.p.',desc:'Soma (ou subtrai, se negativo) pontos percentuais ao alvo e ao mínimo.'},
+ {k:'Não gerar proposta automática',u:'',desc:'A automação não calcula nem envia. A proposta é criada manualmente por uma closer.'},
+ {k:'Outra exceção (observação)',u:'',desc:'Não muda o cálculo. Mostra o aviso para quem for criar ou revisar a proposta.'}
+];
+const excecoes=[
+ {id:'EXC-001',cliente:'Cliente Exemplo 04',tipo:'Deságio fixo',valor:22,de:'2026-09-01',ate:'',motivo:'Condição comercial negociada com o cliente (exemplo simulado)',por:'Usuário de exemplo',ativa:true},
+ {id:'EXC-002',cliente:'Cliente Exemplo 09',tipo:'Ajuste em pontos percentuais',valor:-1.5,de:'2026-10-01',ate:'2026-12-31',motivo:'Cliente recorrente, desconto de relacionamento (exemplo simulado)',por:'Usuário de exemplo',ativa:true},
+ {id:'EXC-003',cliente:'Cliente Exemplo 10',tipo:'Não gerar proposta automática',valor:null,de:'2026-09-15',ate:'',motivo:'Negociação conduzida direto pela closer (exemplo simulado)',por:'Usuário de exemplo',ativa:true},
+ {id:'EXC-004',cliente:'Cliente Exemplo 11',tipo:'Outra exceção (observação)',valor:null,de:'2026-08-10',ate:'2026-09-30',motivo:'Enviar a proposta também por e-mail (exemplo simulado)',por:'Usuário de exemplo',ativa:true},
+ {id:'EXC-005',cliente:'Cliente Exemplo 12',tipo:'Deságio fixo',valor:25,de:'2026-07-01',ate:'',motivo:'Condição antiga, substituída por nova negociação (exemplo simulado)',por:'Usuário de exemplo',ativa:false}
+];
+const nrm=v=>String(v||'').trim().toLowerCase();
+function excSituacao(x){
+  if(!x.ativa)return {t:'Inativa',c:'b-neutral'};
+  if(x.ate&&new Date(x.ate+'T23:59:59')<NOW)return {t:'Vencida',c:'b-warn'};
+  if(new Date(x.de+'T00:00:00')>NOW)return {t:'Futura',c:'b-info'};
+  return {t:'Ativa',c:'b-ok'};
+}
+function findExc(cliente){
+  if(!nrm(cliente))return null;
+  return excecoes.find(x=>nrm(x.cliente)===nrm(cliente)&&excSituacao(x).t==='Ativa')||null;
+}
+function excValorTxt(x){
+  if(x.tipo==='Deságio fixo')return pct(x.valor);
+  if(x.tipo==='Ajuste em pontos percentuais')return (x.valor>0?'+':'')+x.valor.toLocaleString('pt-BR')+' p.p.';
+  return '';
+}
+function enrich(p){
+  p.criadaD=new Date(p.criada);p.venceD=addH(p.criadaD,72);
+  p.prazoFinal=p.prazoFinalFixo||Math.max(4,p.prazoBase+p.ajReu+p.ajTrib+p.ajVara);
+  const sp=p.incPol.reduce((a,b)=>a+b.valor,0);
+  p.incPolTotal=sp;
+  p.desagio=(p.status==='calculada'||p.status==='enviada')&&!p.lote?p.alvo+p.penal+p.incDev+p.incCli+sp:0;
+  if(p.lote){p.lote.forEach(l=>{l.incCli=p.incCli;l.desagio=l.alvo+l.penal+l.incDev+l.incCli;});}
+  const ex=p.excecaoId?excecoes.find(x=>x.id===p.excecaoId):null;
+  if(ex&&ex.tipo==='Deságio fixo'&&p.desagio>0)p.desagio=ex.valor;
+}
+propostas.forEach(enrich);
+const addDe=p=>p.penal+p.incDev+p.incCli+p.incPolTotal;
+let nextId=413;
+function statusDe(p){
+  if(p.status==='nao_elegivel')return {k:'nao_elegivel',t:'Não elegível',c:'b-warn'};
+  if(p.status==='erro')return {k:'erro',t:'Com erro',c:'b-err'};
+  if(p.venceD<NOW)return {k:'expirada',t:'Expirada',c:'b-neutral'};
+  if(p.status==='enviada')return {k:'enviada',t:'Enviada',c:'b-ok'};
+  return {k:'calculada',t:'Calculada',c:'b-info'};
+}
+function validadeTxt(p){
+  const s=statusDe(p);
+  if(s.k==='nao_elegivel'||s.k==='erro')return '-';
+  const h=Math.round((p.venceD-NOW)/3600000);
+  if(h<=0)return 'Venceu em '+p.venceD.toLocaleDateString('pt-BR');
+  return 'Vence em '+h+'h';
+}
+
+const params=[
+ {id:'penal',nome:'Penalização por valor',desc:'Pontos percentuais somados ao deságio conforme o valor do crédito.',fonte:'Regras de Negócio Automação Precificação v2 (aba Tabela Penalização Ticket)',versao:3,vigencia:'01/08/2026',por:'Usuário de exemplo',editavel:true,simulado:false,rows:[{k:'Acima de R$ 8.000',v:0,u:'p.p.'},{k:'De R$ 3.000 a R$ 8.000',v:1,u:'p.p.'},{k:'Abaixo de R$ 3.000',v:3,u:'p.p.'}]},
+ {id:'fases',nome:'Prazo base por fase (réu público)',desc:'Prazo base de liquidação por fase processual. A tabela atual só tem fases de réu público (11 fases, de 7 a 27 meses). Não existe para devedor privado nem pericial.',fonte:'Aba Tabela Fases. Valores desta tela são simulados.',versao:5,vigencia:'01/03/2026',por:'Usuário de exemplo',editavel:true,simulado:true,rows:[{k:'Fase 9',v:8,u:'meses'},{k:'Fase 8 ou 8.1',v:12,u:'meses'},{k:'Fase 7 ou 7.2',v:16,u:'meses'},{k:'Fase 5',v:22,u:'meses'},{k:'Fase 1',v:27,u:'meses'}]},
+ {id:'fasesPrivConc',nome:'Prazo base por fase (devedor privado, laudo com concordância)',desc:'Tabela considerada existente neste protótipo. Valores e fases a definir pelo Comercial e pelo Jurídico.',fonte:'Não existe na planilha Regras v2 hoje. Valores simulados.',versao:1,vigencia:'01/10/2026',por:'Usuário de exemplo',editavel:true,simulado:true,rows:[{k:'Fase 9',v:10,u:'meses'},{k:'Fase 8 ou 8.1',v:14,u:'meses'},{k:'Fase 7 ou 7.2',v:18,u:'meses'},{k:'Fase 5',v:24,u:'meses'},{k:'Fase 1',v:30,u:'meses'}]},
+ {id:'fasesPrivDisc',nome:'Prazo base por fase (devedor privado, laudo com discordância)',desc:'Tabela considerada existente neste protótipo. Valores e fases a definir pelo Comercial e pelo Jurídico.',fonte:'Não existe na planilha Regras v2 hoje. Valores simulados.',versao:1,vigencia:'01/10/2026',por:'Usuário de exemplo',editavel:true,simulado:true,rows:[{k:'Fase 9',v:12,u:'meses'},{k:'Fase 8 ou 8.1',v:16,u:'meses'},{k:'Fase 7 ou 7.2',v:20,u:'meses'},{k:'Fase 5',v:26,u:'meses'},{k:'Fase 1',v:32,u:'meses'}]},
+ {id:'fasesPericial',nome:'Prazo base por fase (honorários periciais)',desc:'Tabela considerada existente neste protótipo. Valores e fases a definir pelo Comercial e pelo Jurídico.',fonte:'Não existe na planilha Regras v2 hoje. Valores simulados.',versao:1,vigencia:'01/10/2026',por:'Usuário de exemplo',editavel:true,simulado:true,rows:[{k:'Fase 9',v:9,u:'meses'},{k:'Fase 8 ou 8.1',v:13,u:'meses'},{k:'Fase 7 ou 7.2',v:17,u:'meses'},{k:'Fase 5',v:23,u:'meses'},{k:'Fase 1',v:29,u:'meses'}]},
+ {id:'desagio',nome:'Deságio alvo por prazo e correção',desc:'Deságio alvo por faixa de prazo. A regra completa também considera o tipo de correção.',fonte:'Aba Tabela Deságios. Valores desta tela são simulados.',versao:4,vigencia:'01/03/2026',por:'Usuário de exemplo',editavel:true,simulado:true,rows:[{k:'1 a 12 meses',v:24,u:'%'},{k:'13 a 24 meses',v:31,u:'%'},{k:'25 a 36 meses',v:38,u:'%'}]},
+ {id:'incpol',nome:'Incrementos da Política',desc:'Incrementos de deságio por exceção de tribunal ou tipo de crédito.',fonte:'Transcrição da planilha de política interna. O PDF da Política não traz os percentuais.',versao:1,vigencia:'01/08/2026',por:'Usuário de exemplo',editavel:true,simulado:false,confirmar:true,rows:[{k:'Dativo com revelia',v:2,u:'%'},{k:'TJRJ (cessão pública)',v:5.7,u:'%'},{k:'TJMT (cessão por instrumento público)',v:3,u:'%'}]},
+ {id:'limites',nome:'Limites fixos da Política',desc:'Limites que a automação sempre respeita. Não são editáveis nesta tela.',fonte:'Regras de Negócio Automação Precificação v2 (Tabela Limitações de Ajustes e regra de prazo)',versao:2,vigencia:'01/03/2026',por:'Usuário de exemplo',editavel:false,simulado:false,rows:[{k:'Prazo final mínimo',v:4,u:'meses'},{k:'Prazo final máximo (acima disso a proposta não é elegível)',v:36,u:'meses'},{k:'Redução máxima do ajuste por vara',v:30,u:'%'},{k:'Ajuste máximo por tribunal e rito',v:50,u:'%'}]},
+ {id:'depara',nome:'Mapeamentos (tribunal, correção + juros e rito)',desc:'Tabelas de equivalência usadas para ler os dados do card. Edição ainda a definir.',fonte:'Abas DePara Tribunais, DePara Correção + Juros e DePara Rito',versao:6,vigencia:'01/03/2026',por:'Usuário de exemplo',editavel:false,simulado:false,rows:[]}
+];
+const historico=[
+ {when:new Date('2026-09-02T10:15'),user:'Usuário de exemplo',param:'Penalização por valor',item:'Abaixo de R$ 3.000',de:'2 p.p.',para:'3 p.p.',motivo:'Atualização da Política (exemplo simulado)'},
+ {when:new Date('2026-08-01T09:00'),user:'Usuário de exemplo',param:'Incrementos da Política',item:'TJMT (cessão por instrumento público)',de:'2%',para:'3%',motivo:'Ajuste pedido pelo Comercial (exemplo simulado)'},
+ {when:new Date('2026-03-02T16:40'),user:'Usuário de exemplo',param:'Prazo base por fase (réu público)',item:'Fase 8 ou 8.1',de:'13 meses',para:'12 meses',motivo:'Revisão semestral (exemplo simulado)'}
+];
+const cnj=[
+ {tribunal:'TRF1',vara:'Vara federal (exemplo A)',meses:11,upd:'2026-10-01'},
+ {tribunal:'TJRJ',vara:'Vara de Fazenda Pública (exemplo B)',meses:19,upd:'2026-08-29'},
+ {tribunal:'TRF3',vara:'Vara federal (exemplo C)',meses:9,upd:'2026-06-26'},
+ {tribunal:'TJMT',vara:'Vara de Fazenda Pública (exemplo D)',meses:null,upd:null}
+];
+const abertos=[
+ ['O que o Comercial edita sozinho','Ainda não definido (falta falar com a Kátia sobre o que mais muda na Política). Nesta tela, tudo que é editável é proposta.'],
+ ['Quem acessa o módulo','Acesso restrito. Alinhar com o Diego quem terá acesso.'],
+ ['Envio da proposta: PDF ou só campos','Em aberto. O botão de envio é um placeholder.'],
+ ['Regra de soma dos incrementos','A composição do deságio ofertado é ilustrativa. A regra de soma de alvo, penalização e incrementos precisa ser confirmada.'],
+ ['Incrementos TJRJ (+5,7%) e TJMT (+3%)','Constam só na transcrição da planilha de política interna. Confirmar vigência e aplicação com o Comercial.'],
+ ['Falha do CNJ','Não há regra definida para quando a consulta falha ou não há tempo para a vara.'],
+ ['Dados do CNJ no SIJ','A ação 7 do plano da Beth verifica se o tempo de vara e a data de atualização existem no SIJ hoje. Se faltarem, vira bug ou entrega nova.'],
+ ['Alerta de desatualização do CNJ','Usei 90 dias, a partir do ciclo de cerca de 3 meses citado na reunião. Validar com a Raisa.'],
+ ['Prazo para devedor privado e pericial','O protótipo considera que as tabelas de prazo existem (devedor privado com concordância e com discordância, e pericial), com valores simulados. Hoje elas não existem. Fases e prazos dependem do Comercial e do Jurídico.'],
+ ['Deságio e penalização para privado e pericial','O protótipo reaproveita as tabelas de deságio e de penalização por valor dos casos de devedor público. Confirmar com o Comercial. Misto usa a tabela de devedor privado, também a confirmar.'],
+ ['Criação manual: quem pode criar','Não definido. Proposta: mesmo grupo de acesso do módulo, com o motivo da criação sempre registrado.'],
+ ['Criação manual: escolha do deságio','Faixa do mínimo ao alvo, como hoje na calculadora. Motivo obrigatório quando o deságio fica abaixo do alvo é proposta minha. Como penalização e incrementos entram na faixa também precisa ser confirmado.'],
+ ['Criação manual de lote','Não incluída nesta versão do protótipo. Hoje as closers montam lote em planilha própria, então vale decidir se entra.'],
+ ['Exceções de clientes: chave do cliente','O protótipo busca pelo nome. A chave real (CPF ou ID do cliente no Ploomes) precisa ser definida para a automação encontrar a exceção.'],
+ ['Exceções de clientes: quem cadastra e aprova','Não definido. Deságio fixo abaixo do mínimo da Política muda a margem, então vale decidir se precisa de aprovação (Comercial ou Beth) além do motivo obrigatório.'],
+ ['Exceções de clientes: tipos','Deságio fixo, ajuste em p.p., não gerar proposta automática e observação são a minha proposta. Falta confirmar com o Comercial quais exceções existem hoje, por exemplo na planilha da closer.'],
+ ['Exceção "não gerar proposta automática"','Comportamento da automação não definido (status da proposta, aviso no card do Ploomes, quem é avisado).'],
+ ['Exceções e limites da Política','Se o deságio fixo pode ficar fora do limite inferior da Política está em aberto.'],
+ ['Exceção de prazo','Fora desta versão: o prazo varia por processo, então não cabe como exceção do cliente.'],
+ ['Divergências da Política','Perito com dados bancários e RPV na conta ("não fazer" no PDF, "aguarda" na planilha) e teto de precatório (R$ 200 mil contra R$ 300 mil) seguem pendentes.']
+];
+
+/* ---------- estado ---------- */
+const S={cf:null,cfErr:{},view:'list',tab:'propostas',sel:null,f:{q:'',status:'todos',origem:'todas',credito:'todos'},open:{memoria:true},page:1};
+const root=document.getElementById('root'),layer=document.getElementById('layer');
+
+/* ---------- renderização ---------- */
+function render(){
+  if(S.view==='create')root.innerHTML=renderCreate();
+  else if(S.view==='detail')root.innerHTML=renderDetail();
+  else root.innerHTML=renderHome();
+}
+function header(title,desc,action=''){
+  return `<div class="page-header"><div><h1>${title}</h1><p>${desc}</p></div><div>${action}</div></div>`;
+}
+function renderHome(){
+  const tabs=[['propostas','Propostas'],['parametros','Parâmetros de cálculo'],['excecoes','Exceções de clientes'],['cnj','Tempo de vara e tribunal'],['historico','Histórico de alterações']];
+  let body='';
+  if(S.tab==='propostas')body=renderLista();
+  if(S.tab==='parametros')body=renderParametros();
+  if(S.tab==='excecoes')body=renderExcecoes();
+  if(S.tab==='cnj')body=renderCnj();
+  if(S.tab==='historico')body=renderHistorico();
+  return `<div class="breadcrumb"><span>SIJ</span><span>/</span><span>Propostas</span></div>
+  ${header('Propostas','Acompanhe as propostas calculadas automaticamente e gerencie as regras de cálculo e as exceções de clientes.',S.tab==='propostas'?'<button class="btn primary" data-action="create">Criar proposta</button>':S.tab==='excecoes'?'<button class="btn primary" data-action="exc-new">Nova exceção</button>':'')}
+  <div class="tabs">${tabs.map(t=>`<button class="tab ${S.tab===t[0]?'active':''}" data-action="tab" data-v="${t[0]}">${t[1]}</button>`).join('')}</div>${body}`;
+}
+function filtradas(){
+  const f=S.f,q=f.q.trim().toLowerCase();
+  return propostas.filter(p=>{
+    const st=statusDe(p).k;
+    if(f.status!=='todos'&&st!==f.status)return false;
+    if(f.origem!=='todas'&&p.origem!==f.origem)return false;
+    if(f.credito!=='todos'&&!p.credito.toLowerCase().includes(f.credito))return false;
+    if(q&&!(p.cliente+p.processo+p.id).toLowerCase().includes(q))return false;
+    return true;
+  });
+}
+function renderLista(){
+  const list=filtradas();
+  const opt=(vals,cur)=>vals.map(v=>`<option value="${v[0]}" ${cur===v[0]?'selected':''}>${v[1]}</option>`).join('');
+  const rows=list.map(p=>{
+    const s=statusDe(p);
+    const lq=p.lote?'Por processo':brl(p.liquido);
+    return `<tr class="click" data-action="open" data-id="${p.id}">
+      <td><b>${p.id}</b>${p.manual?'<span class="badge b-manual">Manual</span>':''}<div class="sub">${dt(p.criadaD)}</div></td>
+      <td>${esc(p.cliente)}<div class="sub">${esc(p.processo)}</div></td>
+      <td>${esc(p.devedor)}<div class="sub">${p.tipoDevedor}</div></td>
+      <td>${esc(p.credito)}</td>
+      <td>${esc(p.modelo)}</td>
+      <td class="num">${p.lote?'Por processo':(p.desagio?pct(p.desagio):'-')}</td>
+      <td class="num">${(s.k==='nao_elegivel'||s.k==='erro')?'-':lq}</td>
+      <td><span class="badge ${s.c}">${s.t}</span></td>
+      <td>${validadeTxt(p)}</td>
+      <td>${p.origem}</td></tr>`;
+  }).join('');
+  return `<div class="toolbar">
+    <div class="field search-wrap"><label>Busca</label>${ic('search')}<input class="input" id="q" placeholder="Cliente, processo ou código" value="${esc(S.f.q)}"></div>
+    <div class="field"><label>Status</label><select class="select" data-filter="status">${opt([['todos','Todos'],['calculada','Calculada'],['enviada','Enviada'],['expirada','Expirada'],['nao_elegivel','Não elegível'],['erro','Com erro']],S.f.status)}</select></div>
+    <div class="field"><label>Origem</label><select class="select" data-filter="origem">${opt([['todas','Todas'],['Blip','Blip'],['Which','Which']],S.f.origem)}</select></div>
+    <div class="field"><label>Tipo de crédito</label><select class="select" data-filter="credito">${opt([['todos','Todos'],['condenação','Condenação'],['sucumbenciais','Honorários sucumbenciais'],['contratuais','Honorários contratuais'],['dativos','Honorários dativos']],S.f.credito)}</select></div>
+  </div>
+  ${list.length?`<div class="table-wrap"><table><thead><tr><th>Proposta</th><th>Cliente e processo</th><th>Devedor</th><th>Tipo de crédito</th><th>Modelo</th><th class="num">Deságio ofertado</th><th class="num">Valor líquido</th><th>Status</th><th>Validade</th><th>Origem</th></tr></thead><tbody>${rows}</tbody></table></div>
+  <div class="pager"><span>${list.length} de ${propostas.length} propostas. Validade de 72 horas a partir do cálculo.</span><span>Valor líquido calculado pela Análise</span></div>`
+  :`<div class="card empty"><b>Nenhuma proposta encontrada com esses filtros</b>Ajuste os filtros ou limpe a busca para ver todas as propostas.<div style="margin-top:12px"><button class="btn outline" data-action="clear">Limpar filtros</button></div></div>`}`;
+}
+function kv(k,v,src=''){return `<div class="kv"><span class="k">${k}</span><span class="v">${v}</span>${src?`<span class="src">${src}</span>`:''}</div>`;}
+function renderDetail(){
+  const p=propostas.find(x=>x.id===S.sel),s=statusDe(p);
+  const nao=s.k==='nao_elegivel',erro=s.k==='erro';
+  let alerts='';
+  if(nao)alerts+=`<div class="alert al-warn">${ic('alert',18)}<div><strong>Proposta não elegível</strong>${esc(p.motivo)} O aviso também é gravado no card do Ploomes, sem criar task.</div></div>`;
+  if(erro)alerts+=`<div class="alert al-err">${ic('alert',18)}<div><strong>Erro no cálculo</strong>${esc(p.erroMsg)}</div></div>`;
+  if(s.k==='expirada')alerts+=`<div class="alert al-info">${ic('clock',18)}<div><strong>Proposta expirada</strong>A validade de 72 horas terminou em ${dt(p.venceD)}. O que acontece depois (recalcular, reenviar) está em aberto.</div></div>`;
+  const ex=p.excecaoId?excecoes.find(x=>x.id===p.excecaoId):null;
+  if(ex)alerts+=`<div class="alert al-warn">${ic('alert',18)}<div><strong>Exceção de cliente aplicada (${ex.id})</strong>${esc(ex.tipo)}${ex.valor!==null?' ('+excValorTxt(ex)+')':''}. ${esc(ex.motivo)}. ${ex.tipo==='Deságio fixo'?'O deságio ofertado é fixo e não segue a faixa mínimo e alvo.':''}</div></div>`;
+  if(p.manual)alerts+=`<div class="alert al-info">${ic('info',18)}<div><strong>Proposta criada manualmente</strong>Motivo: ${esc(p.manual.motivo)}. ${p.manual.fixo?'Deságio fixo por exceção: '+pct(p.desagio)+'.':'Deságio escolhido: '+pct(p.desagio)+', dentro da faixa de '+pct(p.manual.min)+' a '+pct(p.manual.max)+'.'}${p.manual.motivoDesagio?' Motivo da escolha: '+esc(p.manual.motivoDesagio)+'.':''}</div></div>`;
+  if(p.alertas&&p.alertas.length)alerts+=`<div class="alert al-info">${ic('info',18)}<div><strong>Alertas do cálculo</strong>${p.alertas.map(a=>`<span class="badge b-yel" style="margin-right:6px">${a}</span>`).join('')}</div></div>`;
+
+  const dados=`<div class="card"><h3>Dados do caso</h3><div class="grid g4">
+    ${kv('Tipo de devedor',p.tipoDevedor,'Reanálise, ou Primeira análise se vazio')}
+    ${kv('Tipo de crédito',esc(p.credito))}
+    ${p.laudo?kv('Laudo',esc(p.laudo)):''}
+    ${kv('Modelo',esc(p.modelo),'Indicado pela Análise no card')}
+    ${kv('Fase',esc(p.fase))}
+    ${kv('Tribunal e UF',esc(p.tribunal)+(p.uf!=='-'?' / '+p.uf:''))}
+    ${kv('Rito',esc(p.rito))}
+    ${kv('Vara',esc(p.vara))}
+    ${kv('Valor de face',p.valorFace?brl(p.valorFace):'Por processo')}
+    ${kv('IR',p.lote?'Por processo':brl(p.ir),'Calculado pela Análise')}
+    ${kv('Valor líquido',p.lote?'Por processo':(nao||erro?'-':brl(p.liquido)),'Calculado pela Análise')}
+  </div></div>`;
+
+  let calculo='';
+  if(!p.lote&&!erro){
+    const prazo=`<h4>Prazo de liquidação</h4>
+      <div class="line"><span class="l">Prazo base da fase</span><span class="r">${p.prazoBase} meses</span></div>
+      <div class="line"><span class="l">Ajuste por réu</span><span class="r">${p.ajReu>=0?'+':''}${p.ajReu} meses</span></div>
+      <div class="line"><span class="l">Ajuste por tribunal, UF e rito</span><span class="r">${p.ajTrib>=0?'+':''}${p.ajTrib} meses</span></div>
+      <div class="line"><span class="l">Ajuste por vara (dados do CNJ)</span><span class="r">${p.ajVara>=0?'+':''}${p.ajVara} meses</span></div>
+      <div class="line total"><span class="l">Prazo final</span><span class="r" style="${nao?'color:var(--red500)':''}">${p.prazoFinal} meses</span></div>`;
+    const des=nao?`<h4>Deságio</h4><div class="empty" style="padding:24px 8px"><b style="font-size:14px">Sem cálculo</b>O deságio não é calculado quando o prazo passa de 36 meses.</div>`:
+    `<h4>Deságio <span class="tip" title="A regra de soma entre alvo, penalização e incrementos precisa ser confirmada. A composição abaixo é ilustrativa.">composição ilustrativa</span></h4>
+      <div class="line"><span class="l">Deságio alvo</span><span class="r">${pct(p.alvo)}</span></div>
+      <div class="line"><span class="l">Penalização por valor</span><span class="r">+${p.penal.toLocaleString('pt-BR')} p.p.</span></div>
+      <div class="line"><span class="l">Incremento de risco do devedor (da Análise)</span><span class="r">+${pct(p.incDev)}</span></div>
+      <div class="line"><span class="l">Risco do cliente (do card)</span><span class="r">+${pct(p.incCli)}</span></div>
+      ${p.incPol.map(i=>`<div class="line"><span class="l">${esc(i.nome)}${i.confirmar?CONFIRMAR:''}</span><span class="r">${i.valor<0?'':'+'}${pct(i.valor)}</span></div>`).join('')}
+      ${p.manual&&!p.manual.fixo?`<div class="line"><span class="l">Escolha da closer dentro da faixa</span><span class="r">${(p.desagio-(p.alvo+addDe(p)))>=0?'+':''}${pct(p.desagio-(p.alvo+addDe(p)))}</span></div>`:''}
+      <div class="line total"><span class="l">${ex&&ex.tipo==='Deságio fixo'?'Deságio ofertado (fixo por exceção)':p.manual?'Deságio escolhido':'Deságio ofertado'}</span><span class="r">${pct(p.desagio)}</span></div>
+      <div class="line"><span class="l">Deságio alvo, com os mesmos acréscimos</span><span class="r">${pct(p.alvo+addDe(p))}</span></div>
+      <div class="line"><span class="l">Deságio mínimo (limite inferior), com os mesmos acréscimos</span><span class="r">${pct(p.minimo+addDe(p))}</span></div>`;
+    calculo=`<div class="grid g2" style="margin-top:16px"><div class="card">${prazo}</div><div class="card">${des}</div></div>`;
+  }
+  if(p.lote){
+    const rows=p.lote.map(l=>`<tr><td class="small">${l.proc}</td><td class="small">${l.credito}</td><td class="small">${l.fase}</td><td class="small">${l.modelo}</td><td class="num small">${brl(l.valor)}</td><td class="num small">${pct(l.alvo)}</td><td class="num small">+${l.penal.toLocaleString('pt-BR')} p.p.</td><td class="num small">+${pct(l.incCli)}</td><td class="num"><b>${pct(l.desagio)}</b></td><td class="num small">${brl(l.liquido)}</td></tr>`).join('');
+    calculo=`<div class="card" style="margin-top:16px"><h3>Processos do lote</h3>
+      <div class="alert al-info">${ic('info',18)}<div><strong>Deságio diferente dentro do lote</strong>Cada processo tem o deságio do seu modelo e tipo de crédito. Quando todos usam o mesmo deságio, a tabela mostra valores iguais. Exceções ficam em aberto (dependem do Comercial).</div></div>
+      <div class="table-wrap lotes"><table><thead><tr><th>Processo</th><th>Crédito</th><th>Fase</th><th>Modelo</th><th class="num">Valor de face</th><th class="num">Alvo</th><th class="num">Penalização</th><th class="num">Risco do cliente</th><th class="num">Deságio ofertado</th><th class="num">Valor líquido</th></tr></thead><tbody>${rows}</tbody></table></div></div>`;
+  }
+  const mem=(!erro&&!p.lote&&!nao)?`<div class="card" style="margin-top:16px"><div class="collapse-h" data-action="toggle" data-v="memoria"><span>Memória de cálculo</span>${ic('chev')}</div>
+    <div class="collapse-b ${S.open.memoria?'':'hidden'}">
+    <div class="line"><span class="l">1. Tipo de devedor e crédito</span><span class="r">${p.tipoDevedor}, ${esc(p.credito)}</span></div>
+    <div class="line"><span class="l">2. Prazo base (${esc(p.fase)}${p.tabelaNome?', tabela '+esc(p.tabelaNome):''})</span><span class="r">${p.prazoBase} meses</span></div>
+    <div class="line"><span class="l">3. Ajustes por réu, tribunal, UF, rito e vara</span><span class="r">${p.ajReu+p.ajTrib+p.ajVara>=0?'+':''}${p.ajReu+p.ajTrib+p.ajVara} meses</span></div>
+    <div class="line"><span class="l">4. Prazo final (mínimo 4 e máximo 36 meses)</span><span class="r">${p.prazoFinal} meses</span></div>
+    <div class="line"><span class="l">5. Deságio alvo e mínimo da tabela vigente</span><span class="r">${pct(p.alvo)} e ${pct(p.minimo)}</span></div>
+    <div class="line"><span class="l">6. Penalização por valor</span><span class="r">+${p.penal.toLocaleString('pt-BR')} p.p.</span></div>
+    <div class="line"><span class="l">7. Incrementos (devedor, cliente e Política)</span><span class="r">${p.incDev+p.incCli+p.incPolTotal<0?'':'+'}${pct(p.incDev+p.incCli+p.incPolTotal)}</span></div>
+    <div class="line"><span class="l">8. ${ex&&ex.tipo==='Deságio fixo'?'Deságio fixo por exceção do cliente':p.manual?'Deságio escolhido pela closer':'Deságio ofertado'}</span><span class="r">${pct(p.desagio)}</span></div>
+    <div class="sub" style="margin-top:8px">Tabelas usadas: parâmetros em vigor em ${dt(p.criadaD)} (versões 3 de penalização, 5 de prazo, 4 de deságio e 1 de incrementos).</div></div></div>`:'';
+
+  const docs=(!erro&&!nao)?`<div class="card" style="margin-top:16px"><h3>Condições para comprar e documentos de execução</h3><ul class="open-list">${p.docs.map(d=>`<li>${esc(d)}</li>`).join('')}</ul></div>`:'';
+
+  const envio=`<div class="card" style="margin-top:16px;display:flex;justify-content:space-between;align-items:center;gap:16px;flex-wrap:wrap">
+    <div><b>Envio ao cliente</b><div class="sub">Origem ${p.origem}. ${p.origem==='Blip'?'Dispara o Template 1 ou 2 e o PDF só segue após a resposta do cliente.':'Segue todo o processo no Which V2.'} Validade: ${validadeTxt(p)}.</div></div>
+    <div style="display:flex;gap:8px"><button class="btn outline" disabled title="PDF ou só campos: ainda em aberto">Ver proposta</button><button class="btn primary" disabled title="Envio automático: o disparo é feito pela automação, sem ação da closer">Envio automático</button></div></div>`;
+
+  return `<div class="breadcrumb"><a data-action="back">Propostas</a><span>/</span><span>${p.id}</span></div>
+  <div class="page-header"><div><h1>${p.id} <span class="badge ${s.c}" style="font-size:13px;vertical-align:middle">${s.t}</span></h1>
+    <p>${esc(p.cliente)}, processo ${esc(p.processo)}</p>
+    <div class="meta-row"><span>Criada em ${dt(p.criadaD)}</span><span>Validade: ${validadeTxt(p)}</span><span>Origem: ${p.origem}</span></div></div>
+    <button class="btn outline" data-action="back">${ic('back')} Voltar</button></div>
+  ${alerts}${dados}${calculo}${mem}${docs}${envio}
+  <div class="alert al-info" style="margin-top:16px">${ic('info',18)}<div><strong>Escolha de deságio</strong>Nas propostas automáticas, o deságio é calculado e não pode ser alterado nesta tela. Só a criação manual permite escolher entre o mínimo e o alvo. Exceções de cliente (deságio fixo e outras) são cadastradas na aba Exceções de clientes.</div></div>`;
+}
+function renderParametros(){
+  const cards=params.map(t=>{
+    const rows=t.rows.length?`<div class="table-wrap" style="margin-top:12px"><table><thead><tr><th>Item</th><th class="num">Valor</th></tr></thead><tbody>${t.rows.map(r=>`<tr><td>${esc(r.k)}</td><td class="num">${typeof r.v==='number'?r.v.toLocaleString('pt-BR'):r.v} ${r.u}</td></tr>`).join('')}</tbody></table></div>`:'';
+    const btn=t.editavel?`<button class="btn outline sm" data-action="edit" data-id="${t.id}">${ic('edit',14)} Editar</button>`:`<span class="lock">${ic('lock',14)} ${t.id==='limites'?'Fixo pela Política':'Edição a definir'}</span>`;
+    return `<div class="card"><div style="display:flex;justify-content:space-between;gap:12px;align-items:flex-start"><div><h3 style="margin-bottom:4px">${t.nome}${t.confirmar?CONFIRMAR:''}${t.simulado?'<span class="tip" title="Valores simulados neste protótipo. Os reais estão na planilha Regras de Negócio v2.">valores simulados</span>':''}</h3><p class="sub" style="margin:0">${t.desc}</p></div>${btn}</div>
+    <div class="meta-row"><span>Versão ${t.versao} (vigente desde ${t.vigencia})</span><span>Última alteração por ${t.por}</span></div>
+    <div class="meta-row" style="margin-top:4px"><span>Fonte: ${t.fonte}</span></div>${rows}</div>`;
+  }).join('');
+  return `<div class="alert al-info">${ic('info',18)}<div><strong>Quem edita está em definição</strong>O que o Comercial altera sozinho e o que segue via chamado ainda não foi definido. Os botões de edição mostram a proposta de fluxo: nova versão com data de vigência e motivo obrigatório. As versões antigas ficam guardadas.</div></div>${cards}`;
+}
+
+function renderExcecoes(){
+  const q=nrm(S.excQ||'');
+  const lista=excecoes.filter(x=>!q||nrm(x.cliente).includes(q));
+  const rows=lista.map(x=>{const st=excSituacao(x);const vig=new Date(x.de+'T12:00:00').toLocaleDateString('pt-BR')+(x.ate?' a '+new Date(x.ate+'T12:00:00').toLocaleDateString('pt-BR'):' em diante');
+    return `<tr><td><b>${esc(x.cliente)}</b><div class="sub">${x.id}</div></td><td>${esc(x.tipo)}${x.valor!==null?`<div class="sub"><b>${excValorTxt(x)}</b></div>`:''}</td><td class="small">${vig}</td><td class="small">${esc(x.motivo)}</td><td class="small">${esc(x.por)}</td><td><span class="badge ${st.c}">${st.t}</span></td><td><div style="display:flex;gap:6px"><button class="btn outline sm" data-action="exc-edit" data-id="${x.id}">${ic('edit',14)} Editar</button><button class="btn outline sm" data-action="exc-toggle" data-id="${x.id}">${x.ativa?'Inativar':'Reativar'}</button></div></td></tr>`;}).join('');
+  return `<div class="alert al-info">${ic('info',18)}<div><strong>Como a exceção funciona</strong>Antes de calcular, a automação consulta este cadastro. Se o cliente tem exceção ativa, ela é aplicada e aparece na proposta e na memória de cálculo. Quem pode cadastrar e se precisa de aprovação ainda está em aberto.</div></div>
+  <div class="toolbar"><div class="field" style="min-width:260px"><label>Buscar cliente</label><input class="input" id="exq" placeholder="Nome do cliente" value="${esc(S.excQ||'')}"></div></div>
+  <div class="table-wrap"><table><thead><tr><th>Cliente</th><th>Exceção</th><th>Vigência</th><th>Motivo</th><th>Cadastrada por</th><th>Situação</th><th></th></tr></thead><tbody>${rows||'<tr><td colspan="7"><div class="empty">Nenhuma exceção encontrada.</div></td></tr>'}</tbody></table></div>
+  <div class="pager"><span>${lista.length} exceção(ões). Os dados são exemplos simulados.</span></div>`;
+}
+function openExc(id){
+  const x=id?excecoes.find(e=>e.id===id):null;
+  S.exc=x?{id:x.id,cliente:x.cliente,tipo:x.tipo,valor:x.valor===null?'':String(x.valor).replace('.',','),de:x.de,ate:x.ate,motivo:'',err:{}}:{id:null,cliente:'',tipo:'Deságio fixo',valor:'',de:'2026-10-13',ate:'',motivo:'',err:{}};
+  drawExc();
+}
+function drawExc(){
+  const e=S.exc,er=e.err,t=TIPOS_EXC.find(z=>z.k===e.tipo);
+  const fld=(l,k,inner,h='')=>`<div class="field" style="margin-bottom:12px"><label>${l}</label>${inner}${er[k]?`<span class="err-txt">${er[k]}</span>`:(h?`<span class="sub">${h}</span>`:'')}</div>`;
+  layer.innerHTML=`<div class="overlay" data-action="close-layer"><div class="drawer">
+   <h3>${e.id?'Editar exceção '+e.id:'Nova exceção de cliente'}</h3><p class="lead">${e.id?'A alteração fica registrada no histórico, com o motivo.':'A exceção vale para as próximas propostas do cliente. As já calculadas não mudam.'}</p>
+   ${fld('Cliente','cliente',`<input class="input ${er.cliente?'err':''}" data-exc="cliente" value="${esc(e.cliente)}" placeholder="Nome do cliente">`,'Hoje a busca é pelo nome. A chave definitiva (CPF ou ID no Ploomes) está em aberto.')}
+   ${fld('Tipo de exceção','tipo',`<select class="select" data-exc="tipo">${TIPOS_EXC.map(z=>`<option ${z.k===e.tipo?'selected':''}>${z.k}</option>`).join('')}</select>`,t.desc)}
+   ${t.u?fld('Valor ('+t.u+')','valor',`<input class="input ${er.valor?'err':''}" data-exc="valor" value="${esc(e.valor)}" placeholder="${t.u==='p.p.'?'Ex.: -1,5':'Ex.: 22'}">`):''}
+   <div class="fgrid">${fld('Vigência a partir de','de',`<input class="input" type="date" data-exc="de" value="${e.de}">`)}${fld('Até (opcional)','ate',`<input class="input" type="date" data-exc="ate" value="${e.ate}">`)}</div>
+   ${fld('Motivo (obrigatório)','motivo',`<textarea class="input ${er.motivo?'err':''}" rows="3" data-exc="motivo" placeholder="Ex.: condição negociada pelo Comercial">${esc(e.motivo)}</textarea>`)}
+   <div class="modal-actions"><button class="btn outline" data-action="close-layer">Cancelar</button><button class="btn primary" data-action="exc-save">Salvar exceção</button></div></div></div>`;
+}
+function saveExc(){
+  const e=S.exc,er={},t=TIPOS_EXC.find(z=>z.k===e.tipo);
+  if(!e.cliente.trim())er.cliente='Informe o cliente.';
+  if(!e.motivo.trim())er.motivo='Informe o motivo.';
+  let v=null;
+  if(t.u){v=num(e.valor);if(isNaN(v))er.valor='Informe um número.';else if(e.tipo==='Deságio fixo'&&(v<=0||v>=100))er.valor='Use um valor entre 0 e 100.';}
+  if(e.ate&&e.ate<e.de)er.ate='A data final fica antes do início.';
+  e.err=er;if(Object.keys(er).length){drawExc();return;}
+  const novo=excValorTxt({tipo:e.tipo,valor:v});
+  if(e.id){
+    const x=excecoes.find(z=>z.id===e.id);
+    const antes=x.tipo+(x.valor!==null?' '+excValorTxt(x):'');
+    Object.assign(x,{cliente:e.cliente.trim(),tipo:e.tipo,valor:v,de:e.de,ate:e.ate});
+    historico.unshift({when:new Date(NOW),user:'Usuário de exemplo',param:'Exceções de clientes',item:x.cliente+' ('+x.id+')',de:antes,para:x.tipo+(novo?' '+novo:''),motivo:e.motivo.trim()});
+    toast('Exceção atualizada',x.id+' foi alterada e registrada no histórico.');
+  }else{
+    const id='EXC-'+String(excecoes.length+1).padStart(3,'0');
+    excecoes.unshift({id,cliente:e.cliente.trim(),tipo:e.tipo,valor:v,de:e.de,ate:e.ate,motivo:e.motivo.trim(),por:'Usuário de exemplo',ativa:true});
+    historico.unshift({when:new Date(NOW),user:'Usuário de exemplo',param:'Exceções de clientes',item:e.cliente.trim()+' ('+id+')',de:'Sem exceção',para:e.tipo+(novo?' '+novo:''),motivo:e.motivo.trim()});
+    toast('Exceção cadastrada',id+' vale para as próximas propostas do cliente.');
+  }
+  layer.innerHTML='';S.exc=null;render();
+}
+function toggleExc(id){
+  const x=excecoes.find(z=>z.id===id);x.ativa=!x.ativa;
+  historico.unshift({when:new Date(NOW),user:'Usuário de exemplo',param:'Exceções de clientes',item:x.cliente+' ('+x.id+')',de:x.ativa?'Inativa':'Ativa',para:x.ativa?'Ativa':'Inativa',motivo:'Alterado na lista de exceções'});
+  toast(x.ativa?'Exceção reativada':'Exceção inativada',x.id+' registrada no histórico.');render();
+}
+function diasDesde(s){return s?Math.floor((NOW-new Date(s+'T12:00:00'))/86400000):null;}
+function renderCnj(){
+  const rows=cnj.map(r=>{
+    const d=diasDesde(r.upd);
+    let sel,cls;
+    if(d===null){sel='Sem dados';cls='b-neutral';}
+    else if(d>90){sel='Desatualizado, há '+d+' dias';cls='b-warn';}
+    else{sel='Atualizado há '+d+' dias';cls='b-ok';}
+    return `<tr><td>${r.tribunal}</td><td>${r.vara}</td><td class="num">${r.meses===null?'a definir':r.meses+' meses'}</td><td>${r.upd?new Date(r.upd+'T12:00:00').toLocaleDateString('pt-BR'):'-'}</td><td><span class="badge ${cls}">${sel}</span></td></tr>`;
+  }).join('');
+  const antigos=cnj.filter(r=>{const d=diasDesde(r.upd);return d!==null&&d>90}).length;
+  return `${antigos?`<div class="alert al-warn">${ic('alert',18)}<div><strong>${antigos} vara(s) com tempo desatualizado</strong>A atualização do tempo de vara e tribunal acontece a cada cerca de 3 meses. Acima de 90 dias o selo muda para desatualizado, para a Análise não precisar abrir chamado para descobrir isso.</div></div>`:''}
+  <div class="toolbar"><div class="field"><label>Fonte dos dados</label><div style="height:36px;display:flex;align-items:center;font-weight:600">API Dados CNJ</div></div></div>
+  <div class="table-wrap"><table><thead><tr><th>Tribunal</th><th>Vara</th><th class="num">Tempo usado no cálculo</th><th>Última atualização</th><th>Situação</th></tr></thead><tbody>${rows}</tbody></table></div>
+  <div class="pager"><span>Sem tempo para a vara: o comportamento do cálculo está em aberto (a definir).</span></div>`;
+}
+function renderHistorico(){
+  const rows=historico.map(h=>`<tr><td>${dt(h.when)}</td><td>${h.user}</td><td>${h.param}<div class="sub">${esc(h.item)}</div></td><td>${h.de}</td><td><b>${h.para}</b></td><td>${esc(h.motivo)}</td></tr>`).join('');
+  return `<div class="table-wrap"><table><thead><tr><th>Data e hora</th><th>Usuário</th><th>Parâmetro</th><th>Valor anterior</th><th>Valor novo</th><th>Motivo</th></tr></thead><tbody>${rows}</tbody></table></div>
+  <div class="pager"><span>${historico.length} alterações. As três primeiras são exemplos simulados.</span></div>`;
+}
+
+
+/* ---------- criar proposta (manual) ---------- */
+const TRIBUNAIS=['TRF1','TRF3','TRF5','TJRJ','TJMT','TJSP'];
+const CREDITOS=['Condenação','Honorários sucumbenciais','Honorários contratuais','Honorários dativos','Condenação e honorários','Honorários periciais'];
+const MOTIVOS=['Dados incompletos no card da Análise','Caso fora do Ploomes','Correção da Análise, recalcular','Outro'];
+const pTab=id=>params.find(t=>t.id===id);
+const r1=x=>Math.round(x*10)/10;
+const num=v=>{v=String(v).trim();return parseFloat(v.includes(',')?v.replace(/\./g,'').replace(',','.'):v);};
+function defaultCf(){return {cliente:'',origem:'Blip',motivoCriacao:'',processo:'',devedor:'',tipoDevedor:'Público',credito:'',tribunal:'',vara:'',rito:'RPV',fase:'',modelo:'100%',valorFace:'',ir:'',liquido:'',incDev:'0',incCli:'',laudo:'Concordância',dativoRevel:false,escolha:'alvo',valorInter:'',motivoDesagio:''};}
+function varaEntry(c){return cnj.find(x=>x.tribunal===c.tribunal&&x.vara===c.vara);}
+function tabelaPrazo(c){
+  if(c.credito==='Honorários periciais')return {id:'fasesPericial',nome:'honorários periciais'};
+  if(c.tipoDevedor==='Privado'||c.tipoDevedor==='Misto')return c.laudo==='Discordância'?{id:'fasesPrivDisc',nome:'devedor privado, laudo com discordância'}:{id:'fasesPrivConc',nome:'devedor privado, laudo com concordância'};
+  return {id:'fases',nome:'réu público'};
+}
+function calcManual(c){
+  const valor=num(c.valorFace),cli=num(c.incCli);
+  if(!c.fase||!(valor>0)||isNaN(cli))return {suportado:true,pronto:false};
+  const tab=tabelaPrazo(c);
+  const base=pTab(tab.id).rows.find(r=>r.k===c.fase).v;
+  const ve=varaEntry(c);const ajVara=(ve&&ve.meses!==null)?-1:0;
+  const exc=findExc(c.cliente);
+  const prazoFinal=Math.max(4,base+ajVara);
+  if(prazoFinal>36)return {suportado:true,pronto:true,elegivel:false,prazoFinal};
+  const dr=pTab('desagio').rows;const alvoTab=prazoFinal<=12?dr[0].v:prazoFinal<=24?dr[1].v:dr[2].v;
+  const pr=pTab('penal').rows;const penal=valor>8000?pr[0].v:valor>=3000?pr[1].v:pr[2].v;
+  const ip=pTab('incpol').rows;const g=k=>ip.find(r=>r.k.startsWith(k)).v;
+  const incPol=[];
+  if(c.credito==='Honorários dativos'&&c.dativoRevel)incPol.push({nome:'Dativo com revelia',valor:g('Dativo'),confirmar:false});
+  if(c.tribunal==='TJRJ'&&c.tipoDevedor==='Público')incPol.push({nome:'TJRJ, cessão pública e registro em cartório',valor:g('TJRJ'),confirmar:true});
+  if(c.tribunal==='TJMT'&&c.tipoDevedor==='Público')incPol.push({nome:'TJMT, cessão por instrumento público',valor:g('TJMT'),confirmar:true});
+  if(exc&&exc.tipo==='Ajuste em pontos percentuais')incPol.push({nome:'Exceção do cliente ('+exc.id+'), ajuste',valor:exc.valor,confirmar:false});
+  const incDev=parseFloat(c.incDev)||0;
+  const add=penal+incDev+cli+incPol.reduce((a,b)=>a+b.valor,0);
+  return {suportado:true,pronto:true,elegivel:true,exc,fixo:(exc&&exc.tipo==='Deságio fixo')?exc.valor:null,tabela:tab.nome,base,ajVara,prazoFinal,alvoTab,penal,incDev,cli,incPol,add,alvo:r1(alvoTab+add),minimo:r1(alvoTab*0.9+add),valor};
+}
+function escolhido(c,r){
+  if(!r||!r.elegivel)return null;
+  if(r.fixo!=null)return r.fixo;
+  if(c.escolha==='alvo')return r.alvo;
+  if(c.escolha==='minimo')return r.minimo;
+  const v=num(c.valorInter);return isNaN(v)?null:v;
+}
+function resultHtml(){
+  const c=S.cf,r=calcManual(c);
+  if(!r.pronto)return `<div class="sub">Preencha a fase, o valor de face e o risco do cliente para ver o cálculo.</div>`;
+  if(!r.elegivel)return `<div class="alert al-warn">${ic('alert',18)}<div><strong>Proposta não elegível</strong>O prazo final de ${r.prazoFinal} meses passa do limite de 36 meses da Política.</div></div>`;
+  const ch=escolhido(c,r);
+  return `<div class="line"><span class="l">Tabela de prazo</span><span class="r" style="font-size:12px;max-width:190px">${esc(r.tabela)}</span></div>
+   <div class="line"><span class="l">Prazo final</span><span class="r">${r.prazoFinal} meses</span></div>
+   <div class="line"><span class="l">Deságio alvo <span class="tip" title="A regra de soma entre alvo, penalização e incrementos precisa ser confirmada. A composição é ilustrativa.">ilustrativo</span></span><span class="r">${pct(r.alvo)}</span></div>
+   <div class="line"><span class="l">Deságio mínimo</span><span class="r">${pct(r.minimo)}</span></div>
+   <div class="sub" style="margin:6px 0 0">Inclui penalização (+${r.penal.toLocaleString('pt-BR')} p.p.), risco do devedor (+${pct(r.incDev)}), risco do cliente (+${pct(r.cli)})${r.incPol.length?' e incrementos e ajustes ('+(r.incPol.reduce((a,b)=>a+b.valor,0)>=0?'+':'')+pct(r.incPol.reduce((a,b)=>a+b.valor,0))+')':''}.</div>
+   <div class="line total"><span class="l">${r.fixo!=null?'Deságio fixo (exceção do cliente)':'Deságio escolhido'}</span><span class="r">${ch===null?'-':pct(ch)}</span></div>
+   ${r.fixo!=null?`<div class="sub">Exceção ${r.exc.id}: o deságio não depende da faixa de ${pct(r.minimo)} a ${pct(r.alvo)}.</div>`:ch!==null&&(ch<r.minimo||ch>r.alvo)?`<div class="err-txt">Fora da faixa permitida, de ${pct(r.minimo)} a ${pct(r.alvo)}.</div>`:`<div class="sub">Faixa permitida: de ${pct(r.minimo)} a ${pct(r.alvo)}.</div>`}`;
+}
+function updateResult(){
+  const el=document.getElementById('cf-result');if(el)el.innerHTML=resultHtml();
+  const x=findExc(S.cf&&S.cf.cliente),rr=calcManual(S.cf),k=(x?x.id+x.tipo+x.valor:'')+'|'+rr.pronto+rr.elegivel+rr.fixo;
+  if(S.excKey!==k){S.excKey=k;const a=document.getElementById('cf-exc');if(a)a.innerHTML=excAlertHtml(S.cf);const d=document.getElementById('cf-desagio');if(d)d.innerHTML=desagioCardHtml();}
+}
+function varaInfoHtml(c){
+  if(!c.tribunal||!c.vara)return '';
+  const e=varaEntry(c);
+  if(!e||e.meses===null)return `<div class="alert al-warn" style="margin:12px 0 0">${ic('alert',18)}<div><strong>Sem tempo cadastrado para esta vara</strong>O comportamento do cálculo sem esse dado está em aberto. O protótipo não aplica ajuste por vara.</div></div>`;
+  const d=diasDesde(e.upd);
+  return d>90?`<div class="alert al-warn" style="margin:12px 0 0">${ic('alert',18)}<div><strong>Tempo de vara desatualizado</strong>Última atualização há ${d} dias (${e.meses} meses). Considere avisar a Análise.</div></div>`
+   :`<div class="alert al-info" style="margin:12px 0 0">${ic('info',18)}<div>Tempo da vara: ${e.meses} meses, atualizado há ${d} dias (API Dados CNJ).</div></div>`;
+}
+function excAlertHtml(c){
+  const x=findExc(c.cliente);if(!x)return '';
+  const aut=x.tipo==='Não gerar proposta automática';
+  return `<div class="alert al-warn" style="margin:12px 0 0">${ic('alert',18)}<div><strong>Este cliente tem exceção ativa (${x.id})</strong>${esc(x.tipo)}${x.valor!==null?' ('+excValorTxt(x)+')':''}. ${esc(x.motivo)}.${aut?' Por isso a automação não gera proposta para ele e a criação manual é o caminho esperado.':x.tipo==='Outra exceção (observação)'?' Não muda o cálculo.':' Já aplicada no cálculo ao lado.'}</div></div>`;
+}
+function desagioCardHtml(){
+  const c=S.cf,e=S.cfErr,r=calcManual(c);
+  const f=(label,key,inner,hint='')=>`<div class="field" style="min-width:0"><label>${label}</label>${inner}${e[key]?`<span class="err-txt">${e[key]}</span>`:(hint?`<span class="sub">${hint}</span>`:'')}</div>`;
+  const inp=(key,ph='')=>`<input class="input ${e[key]?'err':''}" data-cf="${key}" type="text" placeholder="${ph}" value="${esc(c[key])}">`;
+  const bloqueado=(r.pronto&&!r.elegivel);
+  if(r.fixo!=null)return `<h3>Deságio da proposta</h3><div class="alert al-info">${ic('info',18)}<div><strong>Deságio fixo por exceção</strong>${pct(r.fixo)}, exceção ${r.exc.id}. Não há escolha dentro da faixa para este cliente.</div></div>
+     <div class="modal-actions" style="justify-content:flex-start"><button class="btn primary" data-action="submit-create" ${bloqueado?'disabled':''}>Criar proposta</button><button class="btn outline" data-action="back">Cancelar</button></div>
+     <div class="sub" style="margin-top:8px">A proposta nasce com validade de 72 horas e o envio segue a origem escolhida.</div>`;
+  return `<h3>Deságio da proposta</h3>
+     ${[['alvo','Alvo (sugerido)'],['minimo','Mínimo'],['inter','Valor intermediário']].map(o=>`<label class="radio"><input type="radio" name="esc" data-cf="escolha" value="${o[0]}" ${c.escolha===o[0]?'checked':''}> ${o[1]}</label>`).join('')}
+     ${c.escolha==='inter'?f('Deságio escolhido (%)','valorInter',inp('valorInter','Entre o mínimo e o alvo'),'Entre o mínimo e o alvo'):''}
+     ${c.escolha!=='alvo'?f('Motivo do deságio abaixo do alvo','motivoDesagio','<textarea class="input '+(e.motivoDesagio?'err':'')+'" rows="3" data-cf="motivoDesagio" placeholder="Explique a escolha">'+esc(c.motivoDesagio)+'</textarea>'):''}
+     <div class="modal-actions" style="justify-content:flex-start"><button class="btn primary" data-action="submit-create" ${bloqueado?'disabled':''}>Criar proposta</button><button class="btn outline" data-action="back">Cancelar</button></div>
+     <div class="sub" style="margin-top:8px">A proposta nasce com validade de 72 horas e o envio segue a origem escolhida.</div>`;
+}
+function renderCreate(){
+  const c=S.cf,e=S.cfErr,r=calcManual(c);
+  const f=(label,key,inner,hint='')=>`<div class="field" style="min-width:0"><label>${label}</label>${inner}${e[key]?`<span class="err-txt">${e[key]}</span>`:(hint?`<span class="sub">${hint}</span>`:'')}</div>`;
+  const inp=(key,ph='')=>`<input class="input ${e[key]?'err':''}" data-cf="${key}" type="text" placeholder="${ph}" value="${esc(c[key])}">`;
+  const sel=(key,opts,ph)=>`<select class="select ${e[key]?'err':''}" data-cf="${key}">${ph?`<option value="">${ph}</option>`:''}${opts.map(o=>{const v=Array.isArray(o)?o[0]:o,l=Array.isArray(o)?o[1]:o;return `<option value="${esc(v)}" ${String(c[key])===String(v)?'selected':''}>${esc(l)}</option>`}).join('')}</select>`;
+  const varas=c.tribunal?cnj.filter(x=>x.tribunal===c.tribunal).map(x=>x.vara).concat(['Outra vara (sem tempo cadastrado)']):[];
+  const fasesOpts=pTab('fases').rows.map(x=>x.k);
+  const incNotes=[];
+  if(c.tribunal==='TJRJ'&&c.tipoDevedor==='Público')incNotes.push('TJRJ: incremento da Política aplicado automaticamente (cessão pública, apenas devedor público).');
+  if(c.tribunal==='TJMT'&&c.tipoDevedor==='Público')incNotes.push('TJMT: incremento da Política aplicado automaticamente (cessão por instrumento público, devedor público).');
+  return `<div class="breadcrumb"><a data-action="back">Propostas</a><span>/</span><span>Criar proposta</span></div>
+  ${header('Criar proposta','Use quando a proposta não pôde ser gerada automaticamente. O cálculo segue as mesmas regras, e você escolhe o deságio entre o mínimo e o alvo.')}
+  <div class="create"><div>
+   <div class="card"><h3>Origem e motivo</h3><div class="fgrid">
+     ${f('Cliente','cliente',inp('cliente','Nome do cliente'))}
+     ${f('Origem do lead','origem',sel('origem',['Blip','Which']))}
+     ${f('Motivo da criação manual','motivoCriacao',sel('motivoCriacao',MOTIVOS,'Selecione'),'Fica registrado na proposta')}
+   </div><div id="cf-exc">${excAlertHtml(c)}</div></div>
+   <div class="card"><h3>Dados do caso</h3>
+     <div class="fgrid">
+     ${f('Processo','processo',inp('processo','0000000-00.0000.0.00.0000'))}
+     ${f('Devedor','devedor',inp('devedor','Nome do devedor'))}
+     ${f('Tipo de devedor','tipoDevedor',sel('tipoDevedor',['Público','Privado','Misto']),c.tipoDevedor==='Misto'?'Misto usa a tabela de devedor privado (a confirmar)':'')}
+     ${(c.tipoDevedor==='Privado'||c.tipoDevedor==='Misto')?f('Laudo','laudo',sel('laudo',['Concordância','Discordância']),'Define a tabela de prazo do devedor privado'):''}
+     ${f('Tipo de crédito','credito',sel('credito',CREDITOS,'Selecione'))}
+     ${f('Tribunal','tribunal',sel('tribunal',TRIBUNAIS,'Selecione'))}
+     ${c.tribunal?f('Vara','vara',sel('vara',varas,'Selecione'),'Usa o tempo de vara da tabela do CNJ'):f('Vara','vara','<select class="select" disabled><option>Escolha o tribunal</option></select>')}
+     ${f('Rito','rito',sel('rito',['RPV','Precatório']))}
+     ${f('Fase','fase',sel('fase',fasesOpts,'Selecione'))}
+     ${f('Modelo','modelo',sel('modelo',['100%','50%','Aguarda']),'Indicado pela Análise no card')}
+     ${f('Valor de face (R$)','valorFace',inp('valorFace','0,00'))}
+     ${f('IR (R$)','ir',inp('ir','0,00'),'Calculado pela Análise. Preencha se não vier do card.')}
+     ${f('Valor líquido (R$)','liquido',inp('liquido','0,00'),'Calculado pela Análise. Preencha se não vier do card.')}
+   </div>${varaInfoHtml(c)}</div>
+   <div class="card"><h3>Riscos e incrementos</h3><div class="fgrid">
+     ${f('Incremento de risco do devedor','incDev',sel('incDev',[['0','0%'],['3','3%'],['5','5%']]),'Vem da Análise do devedor')}
+     ${f('Risco do cliente (%)','incCli',inp('incCli','Ex.: 3'),'Valor da automação de risco do cliente (a definir)')}
+   </div>
+   ${c.credito==='Honorários dativos'?`<div class="radio"><input type="checkbox" id="dr" data-cf="dativoRevel" ${c.dativoRevel?'checked':''}><label for="dr">Dativo com revelia (incremento da Política)</label></div>`:''}
+   ${c.credito==='Honorários periciais'?`<div class="alert al-warn" style="margin:12px 0 0">${ic('alert',18)}<div><strong>Dados bancários do perito</strong>O incremento por dados bancários do perito não tem percentual em nenhuma fonte. Depende do Comercial, e o protótipo não aplica.</div></div>`:''}
+   ${incNotes.map(n=>`<div class="alert al-info" style="margin:12px 0 0">${ic('info',18)}<div>${n} <span class="tip" title="Consta na transcrição da planilha de política interna. Confirmar vigência com o Comercial.">a confirmar</span></div></div>`).join('')}
+   </div></div>
+   <div class="sticky"><div class="card"><h3>Cálculo</h3><div id="cf-result">${resultHtml()}</div></div>
+   <div class="card" id="cf-desagio">${desagioCardHtml()}</div></div></div>`;
+}
+function submitCreate(){
+  const c=S.cf,r=calcManual(c),er={};
+  const req=['cliente','processo','devedor','tribunal','fase','credito','motivoCriacao'];
+  req.forEach(k=>{if(!String(c[k]).trim())er[k]='Campo obrigatório.';});
+  if(!(num(c.valorFace)>0))er.valorFace='Informe um valor maior que zero.';
+  if(isNaN(num(c.incCli)))er.incCli='Informe o risco do cliente.';
+  if(c.tribunal&&!c.vara)er.vara='Selecione a vara.';
+  if(!(r.pronto&&r.fixo!=null)&&c.escolha!=='alvo'&&!c.motivoDesagio.trim())er.motivoDesagio='Informe o motivo da escolha.';
+  if(r.pronto&&r.elegivel&&r.fixo==null){
+    const ch=escolhido(c,r);
+    if(ch===null)er.valorInter='Informe o deságio escolhido.';
+    else if(ch<r.minimo||ch>r.alvo)er[c.escolha==='inter'?'valorInter':'escolha']='Fora da faixa permitida.';
+  }
+  S.cfErr=er;
+  if(Object.keys(er).length||!r.pronto||!r.elegivel){render();toast_err('Revise os campos','Há campos obrigatórios ou valores fora da faixa permitida.');return;}
+  const ve=varaEntry(c);
+  const pub=c.tipoDevedor==='Público';
+  const docs=(c.tribunal==='TJRJ'&&pub)?['Cessão pública e registro em cartório de títulos e documentos (apenas para devedor público)']:(c.tribunal==='TJMT'&&pub)?['Cessão por instrumento público, com pagamento após a confecção da cessão pública (devedor público estadual ou municipal)']:DOCS_PADRAO;
+  const id='PRP-'+String(nextId++).padStart(4,'0');
+  const p={id,cliente:c.cliente.trim(),processo:c.processo.trim(),devedor:c.devedor.trim(),tipoDevedor:c.tipoDevedor,credito:c.credito,modelo:c.modelo,origem:c.origem,criada:'2026-10-13T15:00',status:'calculada',liquido:num(c.liquido)||0,tribunal:c.tribunal,uf:'-',rito:c.rito,vara:(ve?ve.vara:'Sem tempo cadastrado'),fase:c.fase,valorFace:r.valor,prazoBase:r.base,ajReu:0,ajTrib:0,ajVara:r.ajVara,alvo:r.alvoTab,minimo:r1(r.alvoTab*0.9),penal:r.penal,incDev:r.incDev,incCli:r.cli,incPol:r.incPol,ir:num(c.ir)||0,docs,alertas:[].concat(r.exc?['Exceção de cliente']:[]).concat(r.incPol.length?['Tem incremento']:[]).concat((c.tribunal==='TJRJ'||c.tribunal==='TJMT')&&pub?['Cessão pública']:[]),tabelaNome:r.tabela,laudo:(c.tipoDevedor!=='Público'?c.laudo:''),
+    manual:{motivo:c.motivoCriacao,motivoDesagio:(r.fixo==null&&c.escolha!=='alvo')?c.motivoDesagio.trim():'',min:r.minimo,max:r.alvo,fixo:r.fixo!=null},excecaoId:r.exc&&r.exc.tipo!=='Não gerar proposta automática'?r.exc.id:null};
+  propostas.unshift(p);enrich(p);p.desagio=escolhido(c,r);
+  S.view='detail';S.sel=id;S.tab='propostas';render();window.scrollTo(0,0);
+  toast('Proposta criada',id+' foi criada manualmente e já aparece na lista.');
+}
+function toast_err(t,d){const el=document.createElement('div');el.className='toast';el.style.borderColor='var(--red500)';el.innerHTML=`<strong>${t}</strong>${d}`;document.body.appendChild(el);setTimeout(()=>el.remove(),4500);}
+
+/* ---------- camadas ---------- */
+function openEdit(id){
+  const t=params.find(x=>x.id===id);
+  layer.innerHTML=`<div class="overlay" data-action="close-layer"><div class="drawer">
+   <h3>Editar: ${t.nome}</h3><p class="lead">A alteração cria a versão ${t.versao+1} com data de vigência. A versão atual continua guardada.</p>
+   ${t.rows.map((r,i)=>`<div class="field" style="margin-bottom:12px"><label>${esc(r.k)} (${r.u})</label><input class="input" data-row="${i}" value="${r.v}"></div>`).join('')}
+   <div class="field" style="margin-bottom:12px"><label>Vigência a partir de</label><input class="input" id="vig" type="date" value="2026-10-14"></div>
+   <div class="field"><label>Motivo da alteração (obrigatório)</label><textarea class="input" id="motivo" rows="3" placeholder="Ex.: atualização da Política, pedido do Comercial"></textarea><span class="sub" id="erro-motivo"></span></div>
+   <div class="modal-actions"><button class="btn outline" data-action="close-layer">Cancelar</button><button class="btn primary" data-action="review" data-id="${id}">Revisar alteração</button></div>
+  </div></div>`;
+}
+function reviewEdit(id){
+  const t=params.find(x=>x.id===id);
+  const inputs=[...layer.querySelectorAll('[data-row]')];
+  const motivo=layer.querySelector('#motivo').value.trim();
+  const vig=layer.querySelector('#vig').value;
+  if(!motivo){const e=layer.querySelector('#erro-motivo');e.textContent='Informe o motivo da alteração.';e.style.color='var(--red500)';layer.querySelector('#motivo').classList.add('err');return;}
+  const novos=inputs.map((inp,i)=>({i,v:parseFloat(String(inp.value).replace(',','.'))}));
+  if(novos.some(n=>isNaN(n.v))){alert_('Preencha todos os valores com números.');return;}
+  const mud=novos.filter(n=>n.v!==t.rows[n.i].v);
+  if(!mud.length){alert_('Nenhum valor foi alterado.');return;}
+  const vigTxt=vig?new Date(vig+'T12:00:00').toLocaleDateString('pt-BR'):'a definir';
+  layer.innerHTML=`<div class="overlay center" data-action="close-layer"><div class="modal">
+   <h3>Confirmar alteração</h3><p class="lead">${t.nome}, nova versão ${t.versao+1}, vigente a partir de ${vigTxt}. As propostas já calculadas não mudam.</p>
+   <div class="diff">${mud.map(n=>`<div>${esc(t.rows[n.i].k)}: <b>${t.rows[n.i].v.toLocaleString('pt-BR')} ${t.rows[n.i].u}</b> para <b>${n.v.toLocaleString('pt-BR')} ${t.rows[n.i].u}</b></div>`).join('')}<div style="margin-top:6px">Motivo: ${esc(motivo)}</div></div>
+   <div class="modal-actions"><button class="btn outline" data-action="close-layer">Cancelar</button><button class="btn primary" id="confirmar">Confirmar</button></div></div></div>`;
+  layer.querySelector('#confirmar').onclick=()=>{
+    mud.forEach(n=>{
+      historico.unshift({when:new Date(NOW),user:'Usuário de exemplo',param:t.nome,item:t.rows[n.i].k,de:t.rows[n.i].v.toLocaleString('pt-BR')+' '+t.rows[n.i].u,para:n.v.toLocaleString('pt-BR')+' '+t.rows[n.i].u,motivo});
+      t.rows[n.i].v=n.v;
+    });
+    t.versao+=1;t.vigencia=vigTxt;t.por='Usuário de exemplo';
+    layer.innerHTML='';toast('Parâmetros salvos','Versão '+t.versao+' de "'+t.nome+'" registrada no histórico.');render();
+  };
+}
+function alert_(msg){
+  const m=layer.querySelector('.drawer');if(!m)return;
+  let a=m.querySelector('.alert');if(a)a.remove();
+  m.insertAdjacentHTML('afterbegin',`<div class="alert al-err">${ic('alert',18)}<div>${msg}</div></div>`);
+}
+function toast(t,d){
+  const el=document.createElement('div');el.className='toast';el.innerHTML=`<strong>${t}</strong>${d}`;document.body.appendChild(el);setTimeout(()=>el.remove(),4500);
+}
+function openPoints(){
+  layer.innerHTML=`<div class="overlay" data-action="close-layer"><div class="drawer"><h3>Pontos em aberto</h3><p class="lead">Decisões que ainda impactam as telas deste protótipo.</p>
+  <ol class="open-list">${abertos.map(a=>`<li><b>${a[0]}</b><span>${a[1]}</span></li>`).join('')}</ol>
+  <div class="modal-actions"><button class="btn outline" data-action="close-layer">Fechar</button></div></div></div>`;
+}
+
+/* ---------- eventos ---------- */
+document.addEventListener('click',e=>{
+  const el=e.target.closest('[data-action]');if(!el)return;
+  const a=el.dataset.action;
+  if(a==='close-layer'){if(e.target===el||el.tagName==='BUTTON')layer.innerHTML='';return;}
+  if(a==='tab'){S.tab=el.dataset.v;S.view='list';render();}
+  else if(a==='open'){S.view='detail';S.sel=el.dataset.id;render();window.scrollTo(0,0);}
+  else if(a==='back'){S.view='list';render();window.scrollTo(0,0);}
+  else if(a==='clear'){S.f={q:'',status:'todos',origem:'todas',credito:'todos'};render();}
+  else if(a==='toggle'){S.open[el.dataset.v]=!S.open[el.dataset.v];render();}
+  else if(a==='create'){S.excKey='';S.view='create';S.cf=defaultCf();S.cfErr={};render();window.scrollTo(0,0);}
+  else if(a==='submit-create')submitCreate();
+  else if(a==='edit')openEdit(el.dataset.id);
+  else if(a==='review')reviewEdit(el.dataset.id);
+  else if(a==='open-points')openPoints();
+  else if(a==='exc-new')openExc(null);
+  else if(a==='exc-edit')openExc(el.dataset.id);
+  else if(a==='exc-save')saveExc();
+  else if(a==='exc-toggle')toggleExc(el.dataset.id);
+});
+document.addEventListener('change',e=>{
+  const ke=e.target.dataset&&e.target.dataset.exc;
+  if(ke==='tipo'&&S.exc){S.exc.tipo=e.target.value;S.exc.valor='';S.exc.err={};drawExc();return;}
+  if(ke&&S.exc){S.exc[ke]=e.target.value;return;}
+  const k=e.target.dataset&&e.target.dataset.cf;
+  if(k&&(e.target.tagName==='SELECT'||e.target.type==='checkbox'||e.target.type==='radio')){
+    S.cf[k]=e.target.type==='checkbox'?e.target.checked:e.target.value;
+    if(k==='tribunal')S.cf.vara='';
+    delete S.cfErr[k];render();return;
+  }
+  const f=e.target.dataset&&e.target.dataset.filter;
+  if(f){S.f[f]=e.target.value;render();}
+});
+document.addEventListener('input',e=>{
+  const ki=e.target.dataset&&e.target.dataset.exc;
+  if(ki&&S.exc){S.exc[ki]=e.target.value;if(S.exc.err[ki]){delete S.exc.err[ki];e.target.classList.remove('err');const m=e.target.parentElement.querySelector('.err-txt');if(m)m.remove();}return;}
+  if(e.target.id==='exq'){S.excQ=e.target.value;const pos=e.target.selectionStart;render();const q=document.getElementById('exq');if(q){q.focus();q.setSelectionRange(pos,pos);}return;}
+  const k=e.target.dataset&&e.target.dataset.cf;
+  if(k){
+    S.cf[k]=e.target.type==='checkbox'?e.target.checked:e.target.value;
+    if(S.cfErr[k]){delete S.cfErr[k];e.target.classList.remove('err');const m=e.target.parentElement.querySelector('.err-txt');if(m)m.remove();}
+    if(e.target.tagName==='INPUT'&&e.target.type==='text'||e.target.tagName==='TEXTAREA')updateResult();
+    return;
+  }
+  if(e.target.id==='q'){
+    S.f.q=e.target.value;const pos=e.target.selectionStart;render();
+    const q=document.getElementById('q');if(q){q.focus();q.setSelectionRange(pos,pos);}
+  }
+});
+render();
+</script>
+</body>
+</html>
